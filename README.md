@@ -7,11 +7,13 @@
 | Fact | Value |
 |---|---|
 | Source | https://claude.ai/artifact/6Pp9aE5NvNvnsLzRYQuooL (public share link to artifact `2bad1cb3-2ac7-4089-9164-450d54c56167`) |
-| Imported | 2026-10-29, by Roman, from frame version `1793115625-2792`; updated 2026-11-02 to `1793478422-bd1f` (adds French), at Greg's request |
+| Imported | 2026-10-29, by Roman, from frame version `1793115625-2792`; updated 2026-11-02 to `1793478422-bd1f` (adds French), at Greg's request; replaced 2026-11-04 by the standalone `index.html` Greg emailed for his Montréal talk (anonymous counts, Results page, talk banner) |
 | Author | Greg, who sent the link on 2026-10-29 |
 | Film | `bil-film-v3.mp4` (61 s, 1080p, 11.7 MB) and `bil-film-v3-poster.jpg`, which the home page's `<video>` loads from beside `index.html`. The artifact refers to them but doesn't contain them; Greg emailed them on 2026-10-31 and they went live on 2026-11-02 |
 
-The page is the artifact byte for byte, with one change: Claude's frame runtime (everything up to `<!-- /frame-runtime -->`) is replaced by `<!doctype html><html lang="en"><head>`. Outside Claude, `window.claude` is absent, so badge downloads use the page's own browser fallback. Visitors' choices stay in their `localStorage` under `bil:` keys.
+The page is Greg's file byte for byte, with `lang="en"` added to `<html>`; a file taken from the artifact frame also has Claude's frame runtime (everything up to `<!-- /frame-runtime -->`) replaced by `<!doctype html><html lang="en"><head>`. Outside Claude, `window.claude` is absent, so badge downloads use the page's own browser fallback. Visitors' choices stay in their `localStorage` under `bil:` keys.
+
+Since 2026-11-04 the page also sends anonymous records to Greg's Google Sheet through a Google Apps Script web app (`BITL_API` in the page): constellations joined or left, ways of caring, proposals, a random browser ID and a visit per `?src=` tag. It reads totals back for the Results page (`#results`, or `#results-<tag>`). `?src=mtl` tags a visitor for 7 days as coming from the Montréal talk and shows a welcome banner. When checking the page in a browser, block `script.google.com` so test visits don't count.
 
 ## Hosting
 
@@ -23,6 +25,8 @@ The page is the artifact byte for byte, with one change: Claude's frame runtime 
 | Not connected | `bringittolife.site`, `.online`, `.fun` and `.solutions`, also in Greg's account |
 
 ## Publish Greg's latest version
+
+If Greg emails the file, use it: the Gmail connector can't download attachments, so fetch the message with `messageFormat: RAW`, decode the MIME part named `index.html`, convert its CRLF line endings to LF and add `lang="en"`, then go to step 4. Otherwise rebuild it from the share link:
 
 1. Open the share link in a browser and check it shows the version Greg wants live. If he started a new artifact, use its link instead.
 2. Copy the `src` of the page's artifact iframe (`https://<uuid>.frame.claudeusercontent.com/_f/<version>/…`). claude.ai's API sits behind a Cloudflare check, so this step needs a browser.

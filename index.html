@@ -1,5 +1,4 @@
-<!doctype html>
-<html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Bring It To Life</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -522,6 +521,34 @@ footer .wrap{display:grid;gap:10px}
 .langsw button:hover{color:var(--ink)}
 .langsw button[aria-pressed="true"]{background:var(--ink);color:var(--ground)}
 @media (max-width:860px){.top .brand{order:-2}.langsw{order:-1;margin-left:auto}}
+.talkban{background:var(--soft);border-bottom:1px solid var(--line)}
+.talkban .wrap{padding-block:12px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;font-size:1.02rem}
+.talkban b{font-family:var(--f-display);font-weight:600}
+.stnear{display:grid;gap:10px;border:1.5px solid var(--celebrate);border-radius:12px;padding:14px 16px}
+.stnear .srow{gap:8px}
+.yourprop{margin-top:28px;display:grid;gap:10px}
+.yourprop ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.yourprop li{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.yourprop li b{font-family:var(--f-display);font-weight:600}
+.rstats{display:flex;flex-wrap:wrap;gap:16px 44px;margin-bottom:34px}
+.rstats>div{display:grid;gap:0}
+.rstats b{font-family:var(--f-display);font-weight:800;font-size:clamp(2.2rem,6vw,3.4rem);line-height:1.05}
+.rstats span{color:var(--muted)}
+.rgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:40px;align-items:start}
+.rlist{display:grid;gap:12px;margin-top:12px}
+.rrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:baseline}
+.rrow .rname{font-family:var(--f-display);font-weight:600;font-size:1.02rem;color:var(--ink);background:none;border:0;padding:0;text-align:left;cursor:pointer}
+button.rname:hover{text-decoration:underline}
+.rrow .rval{font-family:var(--f-mono);font-size:.92rem}
+.rbar{grid-column:1/-1;height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+.rbar i{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0;transition:width .5s}
+.rways .rname{display:inline-flex;gap:.5em;align-items:center;cursor:default}
+.rways .rname i{width:10px;height:10px;border-radius:50%;background:var(--q);flex:none}
+.rprops{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.rprops li{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.3em .9em;font-family:var(--f-display);font-weight:600;font-size:.98rem}
+.rprops small{font-family:var(--f-mono);font-weight:400;color:var(--muted);margin-left:.5em}
+.rside{display:grid;gap:30px;min-width:0}
+@media (max-width:860px){.rgrid{grid-template-columns:minmax(0,1fr)}}
 </style>
 
 <header class="top">
@@ -545,7 +572,8 @@ footer .wrap{display:grid;gap:10px}
     <p><b class="disp" style="font-size:1rem">BringItToLife.org</b> &nbsp;·&nbsp; People &nbsp;·&nbsp; caring &nbsp;·&nbsp; about and for &nbsp;·&nbsp; Life.</p>
     <p>Footprint and handprint estimates come from the BITL science team's open damage models, one for each constellation. Scientists will be able to examine, critique and improve them on the BITL science site (in development).</p>
     <p><button class="linkbtn" data-go="makers">Make and sell constellation badges</button> &nbsp;·&nbsp; <button class="linkbtn" data-go="names">Names and the people of a place</button></p>
-    <p class="note">Prototype. Events, members, campaigns and field notes shown here are examples. Nothing you enter is sent anywhere; your choices stay in this browser.</p>
+    <p><button class="linkbtn" data-go="results">See what people have chosen so far</button></p>
+    <p class="note">Prototype. Events, campaigns and field notes shown here are examples. The constellations you join, the ways of caring you choose and any proposal you send are recorded anonymously. Everything else stays in this browser.</p>
   </div>
 </footer>
 
@@ -821,13 +849,98 @@ let suggested = store.get("suggested",[]);
 const allTribes = () => TRIBES.concat(custom);
 const byId = id => allTribes().find(t=>t.id===id);
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let proposed = store.get("proposed",[]);
+
+// ---------- anonymous records, sent to the BITL Google Sheet ----------
+// Sent: constellations joined or left, ways of caring, proposals, and a random browser ID (so that
+// a change of mind replaces the earlier choice). Not sent: names, email, location, notification settings.
+const BITL_API = "https://script.google.com/macros/s/AKfycbyccZEceB0NRKf5DjgWaBscAYf64kWCq33t9zGEpVlVC7eUmKphCCGpFXHIsThxVd2n/exec";
+const TALKS = {mtl:{name:"the Montréal talk"}};
+let resultsTag = null;
+const rec = (function(){
+  const TAG_DAYS = 7;
+  const hex = n => { const a=new Uint8Array(n); try{ crypto.getRandomValues(a); }catch(e){ for(let i=0;i<n;i++) a[i]=Math.floor(Math.random()*256); } return Array.from(a,x=>x.toString(16).padStart(2,"0")).join(""); };
+  let bid = store.get("bid",null); if(!bid){ bid=hex(12); store.set("bid",bid); }
+  let tagged = store.get("tag",null);
+  try{ const q=new URLSearchParams(location.search).get("src"); if(q && /^[a-z0-9-]{1,40}$/.test(q)){ tagged={v:q,at:Date.now()}; store.set("tag",tagged); } }catch(e){}
+  const src = tagged && Date.now()-tagged.at < TAG_DAYS*864e5 ? tagged.v : "";
+  let queue = store.get("queue",[]), timer=null, sending=false, fails=0;
+  function schedule(ms){ if(!timer) timer=setTimeout(flush,ms); }
+  function add(type,f){
+    if(!BITL_API) return;
+    queue.push(Object.assign({e:hex(12),type,src,lang:document.documentElement.lang==="fr"?"fr":"en",b:bid},f));
+    queue=queue.slice(-200); store.set("queue",queue);
+    schedule(600+Math.random()*1400);
+  }
+  async function flush(){
+    timer=null; if(sending||!queue.length||!BITL_API) return;
+    sending=true; const batch=queue.slice(0,20);
+    try{
+      const r=await fetch(BITL_API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({events:batch}),keepalive:true});
+      const j=await r.json(); if(!j.ok) throw new Error("not saved");
+      const sent=new Set(batch.map(x=>x.e)); queue=queue.filter(x=>!sent.has(x.e)); store.set("queue",queue); fails=0;
+    }catch(e){ fails++; }
+    sending=false;
+    if(queue.length) schedule(fails ? Math.min(30000,1000*Math.pow(2,fails))*(.5+Math.random()) : 300);
+  }
+  addEventListener("online",()=>schedule(500));
+  document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden" && queue.length && !fails) flush(); });
+  if(queue.length) schedule(1500);
+  setTimeout(()=>{ const seen=store.get("visited",{}); const k=src||"-"; if(!seen[k]){ seen[k]=1; store.set("visited",seen); add("visit",{}); } },1200);
+  // ways of caring: only the constellations that changed, shortly after the last click
+  let wt=null;
+  function ways(p){
+    clearTimeout(wt);
+    wt=setTimeout(()=>{ const sent=store.get("sentWays",{}); let any=false;
+      new Set(Object.keys(p).concat(Object.keys(sent))).forEach(id=>{
+        const now=((p[id]&&p[id].q)||[]).join(",");
+        if((sent[id]||"")!==now){ sent[id]=now; any=true; add("ways",{c:id,ways:now}); }
+      });
+      if(any) store.set("sentWays",sent); },1500);
+  }
+  return {add,ways,src};
+})();
+
+// ---------- is a proposed name close to an existing constellation? ----------
+const NEAR = {
+  whales:"whale cetus cetacean cetace baleine humpback rorqual beluga orca epaulard narwhal narval cachalot dolphin dauphin porpoise marsouin",
+  coral:"coral corail coraux reef recif corallium",
+  rainforests:"rainforest|rain forest|foret tropicale|foret pluviale|jungle|amazon|amazonie|silva",
+  songbirds:"songbird|bird|oiseau|oiseaux chanteurs|oiseau chanteur|warbler|paruline|thrush|grive|sparrow|bruant|canora",
+  pollinators:"pollinator pollinisateur bee abeille bumblebee bourdon butterfly papillon monarch monarque anthophila",
+  pandas:"panda ailuropoda",
+  spiders:"spider araignee tarantula tarentule aranea",
+  chesapeake:"chesapeake",
+  champlain:"champlain",
+  agamenticus:"agamenticus",
+  capeneddick:"neddick|nubble"
+};
+const nearNorm = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const nearStem = w => w.length>3 ? w.replace(/[sx]$/,"") : w;
+const nearWords = s => nearNorm(s).split(" ").filter(Boolean).map(nearStem);
+function editDist(a,b){ let p=Array.from({length:b.length+1},(_,i)=>i); for(let i=1;i<=a.length;i++){ const c=[i]; for(let j=1;j<=b.length;j++) c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1)); p=c; } return p[b.length]; }
+function nearMatches(name){
+  const words=nearWords(name), text=" "+words.join(" ")+" ", out=[];
+  Object.keys(NEAR).forEach(id=>{
+    const aliases=NEAR[id].includes("|")?NEAR[id].split("|"):NEAR[id].split(" ");
+    const hit=aliases.some(a=>{
+      const aw=nearWords(a);
+      if(text.includes(" "+aw.join(" ")+" ")) return true;
+      if(aw.length>1 || aw[0].length<5) return false;
+      const limit=aw[0].length>=8?2:1;
+      return words.some(w=>w.length>=4 && editDist(w,aw[0])<=limit);
+    });
+    if(hit && byId(id)) out.push(byId(id));
+  });
+  return out;
+}
 
 const app = document.getElementById("app");
 let view = {name:"home", tribe:null, tab:"celebrate"};
 
 function go(name, tribe, tab){
   view = {name, tribe:tribe||null, tab:tab||"celebrate"};
-  try{ history.replaceState(null,"", "#"+(name==="model"?"model-"+tribe:(tribe||name))); }catch(e){}
+  try{ history.replaceState(null,"", "#"+(name==="model"?"model-"+tribe:name==="results"&&resultsTag?"results-"+resultsTag:(tribe||name))); }catch(e){}
   render(); window.scrollTo({top:0});
 }
 
@@ -841,7 +954,7 @@ function tcards(list){
     <span class="label">${KIND[t.kind]}</span>
     <span class="disp">${esc(ctitle(t))}</span>${t.latin?`<span class="csub">the ${esc(t.tribe)}</span>`:""}
     <span style="color:var(--muted);font-size:1rem">${esc(t.line)}</span>
-    <span class="meta"><span>${t.chapters.length} chapter${t.chapters.length>1?"s":""}</span><span>${t.paths?"Model draft ready":"Model in progress"}</span><span>${memberCount(t).toLocaleString()} stars</span>${joined.includes(t.id)?"<span style='color:var(--accent)'>✦ Your star is here</span>":""}</span>${joined.includes(t.id)&&prefOf(t.id).q.length?`<span class="ways">Your ways: ${prefOf(t.id).q.map(k=>QUADS[k].t).join(" · ")}</span>`:""}
+    <span class="meta"><span>${t.chapters.length} chapter${t.chapters.length>1?"s":""}</span><span>${t.paths?"Model draft ready":"Model in progress"}</span>${joined.includes(t.id)?"<span style='color:var(--accent)'>✦ Your star is here</span>":""}</span>${joined.includes(t.id)&&prefOf(t.id).q.length?`<span class="ways">Your ways: ${prefOf(t.id).q.map(k=>QUADS[k].t).join(" · ")}</span>`:""}
   </button>`).join("");
 }
 
@@ -918,26 +1031,97 @@ function home(){
 `;
 }
 
+let nearDraft=null, joinNote=null;
+function showNear(near){
+  const box=document.getElementById("st-near"); box.hidden=false;
+  box.innerHTML=`<p><b>This may already have a home.</b> Would you like to bring your star here instead?</p>
+    ${near.map(t=>`<div class="srow"><button type="button" class="btn" data-nearjoin="${t.id}">${joined.includes(t.id)?`✦ Your star is already in ${esc(cto(t))}`:`Bring your star to ${esc(cto(t))}`}</button><button type="button" class="linkbtn" data-nearlearn="${t.id}">Learn about ${esc(cto(t))}</button></div>`).join("")}
+    <div><button type="submit" class="linkbtn">No, propose it as new</button></div>`;
+}
+function restoreDraft(){
+  if(!nearDraft) return;
+  const f=k=>document.getElementById("st-"+k);
+  f("name").value=nearDraft.name; f("kind").value=nearDraft.kind; f("line").value=nearDraft.line; f("local").value=nearDraft.local;
+  const near=nearMatches(nearDraft.name); if(near.length){ f("near").dataset.shown=nearDraft.name; showNear(near); }
+}
+function yourProposals(){
+  if(!proposed.length) return "";
+  return `<div class="yourprop"><span class="label">Your proposals</span><ul>${proposed.map(p=>`<li><b translate="no" class="notranslate">${esc(p.name)}</b><span class="note">Suggested</span><button class="linkbtn" data-withdraw="${p.id}">Withdraw</button></li>`).join("")}</ul></div>`;
+}
+function talkBanner(){
+  return `<div class="talkban"><div class="wrap"><b>Welcome from ${TALKS[rec.src].name}.</b><span>Bring your star to a constellation, or propose a new one.</span><button class="linkbtn" data-go="results">See what the room has chosen</button></div></div>`;
+}
+function proposedView(){
+  return `<section class="band"><div class="wrap" style="display:grid;gap:18px;justify-items:start">
+    <span class="label">Thank you</span>
+    <h2>Your proposal is recorded.</h2>
+    <p class="prose" translate="no"><b class="notranslate">${esc(view.last||"")}</b></p>
+    <p class="prose" style="color:var(--muted)">It's listed as suggested for now. It becomes a constellation once work on its model has started and we've found communities already caring about and for it.</p>
+    <div class="srow"><button class="btn" data-go="results">See what people have chosen so far</button><button class="btn ghost" data-go="tribes">Browse constellations</button><button class="btn ghost" data-go="start">Propose another</button></div>
+  </div></section>`;
+}
+function resultsView(){
+  const tag=resultsTag||rec.src, talk=TALKS[tag];
+  return `<section class="band"><div class="wrap">
+    <div class="head"><span class="label">${talk?"Results":"Results so far"}</span><h2>${talk?`What people at ${talk.name} have chosen.`:"What people have chosen so far."}</h2></div>
+    <div id="resBody"><p class="note">Loading the latest totals…</p></div>
+  </div></section>`;
+}
+let resTimer=null;
+async function loadResults(){
+  clearTimeout(resTimer);
+  const tag=resultsTag||rec.src||"all";
+  let d=null;
+  if(BITL_API){ try{ const r=await fetch(BITL_API+"?action=results&src="+encodeURIComponent(tag)); d=await r.json(); if(!d.ok) d=null; }catch(e){ d=null; } }
+  if(view.name!=="results") return;
+  const box=document.getElementById("resBody"); if(!box) return;
+  if(d) box.innerHTML=resultsBody(d);
+  else if(!box.querySelector(".rstats")) box.innerHTML=`<p class="note">The totals aren't available right now. Please try again in a minute.</p>`;
+  resTimer=setTimeout(()=>{ if(view.name==="results" && document.visibilityState==="visible") loadResults(); else if(view.name==="results") resTimer=setTimeout(loadResults,60000); },50000+Math.random()*20000);
+}
+function resultsBody(d){
+  const rows=TRIBES.map(t=>({t,n:(d.by&&d.by[t.id])||0})).sort((a,b)=>b.n-a.n);
+  const max=Math.max(1,rows[0].n), wmax=Math.max(1,...Object.values(d.ways||{}));
+  const stat=(n,one,many)=>`<div><b>${Number(n).toLocaleString()}</b><span>${n===1?one:many}</span></div>`;
+  return `<div class="rstats">${stat(d.participants,"person has taken part","people have taken part")}${stat(d.stars,"star brought","stars brought")}${stat(d.proposed,"new constellation proposed","new constellations proposed")}</div>
+  <div class="rgrid">
+    <div><h3>Stars in each constellation</h3>
+      <div class="rlist">${rows.map(({t,n})=>`<div class="rrow"><button class="rname" data-tribe="${t.id}">${esc(t.name)}</button><span class="rval">${n.toLocaleString()}</span><div class="rbar"><i style="width:${n?Math.max(2,n/max*100):0}%"></i></div></div>`).join("")}</div>
+    </div>
+    <div class="rside">
+      <div><h3>Ways of caring chosen</h3>
+        <div class="rlist rways">${QORDER.map(k=>{const n=(d.ways&&d.ways[k])||0;return `<div class="rrow" style="--q:var(--${k})"><span class="rname"><i></i><span>${QUADS[k].t}</span></span><span class="rval">${n.toLocaleString()}</span><div class="rbar"><i style="width:${n?Math.max(2,n/wmax*100):0}%"></i></div></div>`;}).join("")}</div></div>
+      <div><h3>Proposed constellations</h3>
+        ${(d.proposals&&d.proposals.length)?`<ul class="rprops">${d.proposals.map(p=>`<li><span translate="no" class="notranslate">${esc(p.name)}</span>${p.count>1?`<small>${p.count}</small>`:""}</li>`).join("")}</ul>`:""}
+        <p class="note" style="margin-top:12px">${d.pending>0?(d.pending===1?"1 more proposal is being reviewed.":`${d.pending} more proposals are being reviewed.`):(d.proposals&&d.proposals.length?"Proposals appear here after a quick review.":"None yet. Proposals appear here after a quick review.")}</p>
+        <div style="margin-top:12px"><button class="btn ghost" data-go="start">+ Propose a new constellation</button></div></div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:30px">Totals only. No one can see who chose what. This page updates about once a minute.</p>`;
+}
+
 function tribesView(list, title, sub){
   return `<section class="band"><div class="wrap">
     <div class="head"><span class="label">${sub}</span><h2>${title}</h2></div>
     ${list.length?`<div class="tribes">${tcards(list)}</div>`:`<div class="box"><p>You haven't brought your star to a constellation yet. Choose something you love on the home page, or browse every constellation.</p><div><button class="btn" data-go="tribes">Browse constellations</button></div></div>`}
-    <div style="margin-top:28px"><button class="btn ghost" data-go="start">+ Start a new constellation</button></div>
+    ${sub==="My constellations"?yourProposals():""}
+    <div style="margin-top:28px"><button class="btn ghost" data-go="start">+ Propose a new constellation</button></div>
   </div></section>`;
 }
 
 function startView(){
   return `<section class="band"><div class="wrap" style="display:grid;gap:22px">
-    <div class="head" style="margin:0"><span class="label">Start a constellation</span><h2>Name what you love.</h2>
-    <p class="prose" style="color:var(--muted)">A constellation can be a species, a kind of ecosystem, or one specific place, like a pond, a mountain, or the park on your street. Once a constellation forms, the science team begins building its damage model with help from people who know it best.</p></div>
+    <div class="head" style="margin:0"><span class="label">Propose a constellation</span><h2>Name what you love.</h2>
+    <p class="prose" style="color:var(--muted)">A constellation can be a species, a kind of ecosystem, or one specific place, like a pond, a mountain, or the park on your street. A new proposal is listed as suggested. It becomes a constellation once work on its model has started and we've found communities already caring about and for it.</p></div>
     <form id="startForm" class="box" style="max-width:560px">
       <div class="field"><label for="st-name" class="label">What do you love?</label><input id="st-name" required placeholder="e.g. Fireflies, Lake Sunapee, Salt marshes"></div>
       <div class="field"><label for="st-kind" class="label">It is a</label><select id="st-kind"><option value="species">Species or group of species</option><option value="eco">Kind of ecosystem</option><option value="place">Specific place</option></select></div>
       <div class="field"><label for="st-line" class="label">One line about it</label><input id="st-line" placeholder="What makes it special to you?"></div>
       <div class="field"><label for="st-local" class="label">A name in a local language (optional)</label><input id="st-local" placeholder="Only with the blessing of the people whose language it is">
         <span class="note">Shown as "awaiting the community's blessing" until confirmed. <button class="linkbtn" type="button" data-go="names">How names are chosen →</button></span></div>
-      <div><button class="btn" type="submit">Start the constellation</button></div>
-      <p class="note">Prototype: the new constellation is saved in this browser only.</p>
+      <div class="stnear" id="st-near" hidden></div>
+      <div><button class="btn" type="submit">Propose this constellation</button></div>
+      <p class="note">Please don't include people's names or contact details. We review proposals before showing them publicly.</p>
     </form>
   </div></section>`;
 }
@@ -1525,19 +1709,17 @@ function scienceView(){
 
 
 // ---------- joining a tribe: counted, then it's all up to you ----------
-// Example member counts (prototype). Joining adds one; nobody knows who joined, only how many.
-const MEMBERS = {whales:48212, coral:39104, rainforests:61870, songbirds:52433, pollinators:44918, pandas:57205, spiders:6390, chesapeake:12877, champlain:8641, agamenticus:214, capeneddick:131};
-const memberCount = t => (MEMBERS[t.id]||0) + (joined.includes(t.id)?1:0);
 let prefs = store.get("prefs",{});      // per tribe: {q:[quadrants], ev:{quadrant:{near,online,news}}, ch:{site,email,text:{on,freq}}}
 let contact = store.get("contact",{});  // shared across tribes: {postal, dist, unit, email, loc, locFail}
 const EVK = [["near","In person, near me"],["online","Online events"],["news","Activities and news (not live events)"]];
 const FREQ = ["As it happens","Daily digest","Weekly digest","Monthly digest"];
 const QORDER = ["discover","celebrate","nurture","together"];
 const prefOf = id => { const p = prefs[id] || {}; return {q:p.q||[], ev:p.ev||{}, ch:p.ch||{}}; };
-const savePrefs = () => store.set("prefs",prefs);
+const savePrefs = () => { store.set("prefs",prefs); rec.ways(prefs); };
 const saveContact = () => store.set("contact",contact);
 
-const PRIVACY = `<div class="promise"><b>Our promise: we will never share anything you tell us with anyone, or any organization.</b> Not your email, your location, or even which constellations you've joined. Not with partners, sponsors, companies, governments or other members. Not ever. You can change or delete it all at any time.</div>`;
+const PRIVACY = `<div class="promise"><b>Our promise: we will never share anything you tell us with anyone, or any organization.</b> Not your email, your location, or even which constellations you've joined. Not with partners, sponsors, companies, governments or other members. Not ever. You can change or delete it all at any time.</div>
+<p class="note">What we record: anonymous totals of joins and ways of caring, and any proposal you send, with no names or contact details. They're kept in a Google Sheet that only the BITL team can open. We publish totals only.</p>`;
 
 function howJoinHTML(t){
   const isJ = t && joined.includes(t.id);
@@ -1583,7 +1765,7 @@ function pickCompass(sel){
 }
 
 function mySettings(t){
-  const P = prefOf(t.id), n = memberCount(t);
+  const P = prefOf(t.id);
   const anyEv = P.q.some(k=>P.ev[k] && EVK.some(([e])=>P.ev[k][e]));
   const anyNear = P.q.some(k=>P.ev[k] && P.ev[k].near);
   const ch = (k,lab,extra) => { const c=P.ch[k]||{}; return `<div class="chrow">
@@ -1595,8 +1777,8 @@ function mySettings(t){
       <h2>Your caring is counted. The rest is up to you.</h2></div>
     <div class="mgrid">
       <div class="mstep"><span class="num">1</span><div><h3>Counted</h3>
-        <p><b class="big">${n.toLocaleString()}</b> stars in ${esc(cto(t))}, including yours.</p>
-        <p class="note">Nobody knows who has joined, only how many. ${MEMBERS[t.id]?"(Example count in this prototype.)":""}</p></div></div>
+        <p>Your star is counted.</p>
+        <p class="note">Nobody knows who has joined, only how many. <button class="linkbtn" data-go="results">See the totals</button></p></div></div>
       <div class="mstep"><span class="num">2</span><div><h3>Ways you like to care</h3>
         <p class="note">Choose one or more. You can change them any time.</p>
         <div class="pickwrap">${pickCompass(P.q)}
@@ -1622,7 +1804,7 @@ function mySettings(t){
       </div></div>
     </div>
     ${PRIVACY}
-    <div class="mfoot"><button class="linkbtn" data-forget="${t.id}">Delete my settings for this constellation</button><span class="note">Prototype: everything here is saved only in this browser. Nothing is sent anywhere.</span></div>
+    <div class="mfoot"><button class="linkbtn" data-forget="${t.id}">Delete my settings for this constellation</button><span class="note">Your constellations and ways of caring are counted anonymously. Your location, email and notification choices stay in this browser. Notifications aren't active yet.</span></div>
   </section>`;
 }
 
@@ -1660,6 +1842,15 @@ document.addEventListener("click", e=>{
     P.q = on ? QORDER.filter(x=>x===k||P.q.includes(x)) : P.q.filter(x=>x!==k); prefs[view.tribe]=P; savePrefs(); rerenderKeep(`[data-pq="${k}"]`); return; }
   const fg = e.target.closest("[data-forget]");
   if(fg){ delete prefs[fg.dataset.forget]; savePrefs(); rerenderKeep(); return; }
+  const nj = e.target.closest("[data-nearjoin]");
+  if(nj){ const id=nj.dataset.nearjoin, was=joined.includes(id);
+    if(!was){ joined=joined.concat(id); store.set("joined",joined); rec.add("join",{c:id}); }
+    nearDraft=null; joinNote={id,was}; go("mine"); return; }
+  const nl = e.target.closest("[data-nearlearn]");
+  if(nl){ const g=k=>document.getElementById("st-"+k).value;
+    nearDraft={name:g("name").trim(),kind:g("kind"),line:g("line"),local:g("local")}; go("tribe",nl.dataset.nearlearn); return; }
+  const wd = e.target.closest("[data-withdraw]");
+  if(wd){ const id=wd.dataset.withdraw; rec.add("withdraw",{p:id}); proposed=proposed.filter(x=>x.id!==id); store.set("proposed",proposed); render(); return; }
   if(e.target.closest("[data-locate]")) locate();
 });
 document.addEventListener("keydown", e=>{
@@ -1812,7 +2003,7 @@ function skyCard(t){
       ${isJ?`<g class="mystar"><circle cx="${me[0].toFixed(1)}" cy="${me[1].toFixed(1)}" r="22" fill="url(#mg${t.id})"/><path d="M${me[0].toFixed(1)},${(me[1]-9).toFixed(1)} L${(me[0]+2.4).toFixed(1)},${(me[1]-2.4).toFixed(1)} L${(me[0]+9).toFixed(1)},${me[1].toFixed(1)} L${(me[0]+2.4).toFixed(1)},${(me[1]+2.4).toFixed(1)} L${me[0].toFixed(1)},${(me[1]+9).toFixed(1)} L${(me[0]-2.4).toFixed(1)},${(me[1]+2.4).toFixed(1)} L${(me[0]-9).toFixed(1)},${me[1].toFixed(1)} L${(me[0]-2.4).toFixed(1)},${(me[1]-2.4).toFixed(1)} Z" fill="#FFE08A"/>
         <path d="M${pts[k-1][0].toFixed(1)},${pts[k-1][1].toFixed(1)} L${me[0].toFixed(1)},${me[1].toFixed(1)}" stroke="#FFE08A" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/></g>`:""}
     </svg>
-    <div class="skytext"><b>${memberCount(t).toLocaleString()}</b><span>stars in ${esc(cto(t))}${isJ?" · ✦ one of them is yours":""}</span></div>
+    ${isJ?`<div class="skytext"><span>✦ Your star is here</span></div>`:""}
   </div>`;
 }
 function nameNote(t){
@@ -1861,7 +2052,15 @@ function render(){
   else if(view.name==="orgs") app.innerHTML = orgsView();
   else if(view.name==="makers") app.innerHTML = makersView();
   else if(view.name==="names") app.innerHTML = namesView();
+  else if(view.name==="results") app.innerHTML = resultsView();
+  else if(view.name==="proposed") app.innerHTML = proposedView();
   else app.innerHTML = home();
+  if(view.name==="home" && TALKS[rec.src]) app.insertAdjacentHTML("afterbegin",talkBanner());
+  if(view.name==="results") loadResults();
+  if(view.name==="start") restoreDraft();
+  if(view.name==="tribe" && nearDraft) app.insertAdjacentHTML("afterbegin",`<div class="talkban"><div class="wrap"><button class="linkbtn" data-go="start">← Back to your proposal</button></div></div>`);
+  if(view.name==="mine" && joinNote){ const t=byId(joinNote.id); if(t) app.insertAdjacentHTML("afterbegin",`<div class="talkban"><div class="wrap"><b>✦ Your star is ${joinNote.was?"already":"now"} in ${esc(cto(t))}.</b><button class="linkbtn" data-tribe="${t.id}">Go to ${esc(cto(t))}</button></div></div>`); }
+  if(view.name!=="mine") joinNote=null;
   if(view.name==="home") startUpwell();
   addFilmCaptions();
 }
@@ -1890,7 +2089,7 @@ document.addEventListener("click",e=>{
   else if(el.dataset.go){ e.preventDefault(); go(el.dataset.go); }
   else if(el.dataset.tribe){ go("tribe",el.dataset.tribe); }
   else if(el.dataset.tab){ view.tab=el.dataset.tab; render(); document.getElementById("tab-"+view.tab)?.focus(); }
-  else if(el.dataset.join){ const id=el.dataset.join, was=joined.includes(id); joined = was?joined.filter(x=>x!==id):joined.concat(id); store.set("joined",joined);
+  else if(el.dataset.join){ const id=el.dataset.join, was=joined.includes(id); joined = was?joined.filter(x=>x!==id):joined.concat(id); store.set("joined",joined); rec.add(was?"leave":"join",{c:id}); if(!was) nearDraft=null;
     if(!was && view.name!=="tribe") go("tribe",id);
     if(!was){ view.justJoined=id; render(); view.justJoined=null; } else render();
     if(!was) requestAnimationFrame(()=>document.getElementById("mySettings")?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})); }
@@ -1916,11 +2115,19 @@ document.addEventListener("submit",e=>{
   }
   if(e.target.id!=="startForm") return; e.preventDefault();
   const name=document.getElementById("st-name").value.trim(); if(!name) return;
-  const kind=document.getElementById("st-kind").value, line=document.getElementById("st-line").value.trim()||"A new constellation, just forming.";
-  const id="c"+Date.now().toString(36);
-  const t={id,name,kind,tribe:name+" Constellation",line,conf:null,chapters:["Founding"],paths:null,fp:[],hp:[["Help shape the model","Share what you know harms "+name+", and what helps it."]],events:[["Soon","Founding gathering","The first meeting of the constellation."]],campaign:["Gather what we know","Collect local knowledge for the first model.",1]};
-  custom=custom.concat(t); store.set("custom",custom); joined=joined.concat(id); store.set("joined",joined);
-  go("tribe",id);
+  const near=nearMatches(name), box=document.getElementById("st-near");
+  if(near.length && box.dataset.shown!==name){
+    box.dataset.shown=name; showNear(near);
+    box.scrollIntoView({behavior:"smooth",block:"center"});
+    return;
+  }
+  nearDraft=null;
+  const kind=document.getElementById("st-kind").value, line=document.getElementById("st-line").value.trim(), local=document.getElementById("st-local").value.trim();
+  const p="p"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  rec.add("propose",{p,name,kind,line,local,near:near.map(t=>t.id).join(",")});
+  proposed=proposed.concat({id:p,name}); store.set("proposed",proposed);
+  view.last=name;
+  const last=name; go("proposed"); view.last=last; render();
 });
 
 // ---------- hero: life moving across the page ----------
@@ -1998,23 +2205,40 @@ function startUpwell(){
           [[4,1.6],[0,1.5],[-4.5,2.2]].forEach(([dx,r])=>{ ctx.beginPath(); ctx.arc(ax+d*dx,y,r,0,7); ctx.fill(); });
           ctx.beginPath(); for(const k of [-3,0,3]){ ctx.moveTo(ax+d*k*.5,y); ctx.lineTo(ax+d*k*.5+L,y+3.5); ctx.moveTo(ax+d*k*.5,y); ctx.lineTo(ax+d*k*.5-L,y-3.5); } ctx.stroke(); }
         ctx.restore(); } }; }
-  function rabbit(){ const d=side(), gy=H-6, s=rnd(.9,1.2);
-    return {x:d>0?-30:W+30, t:0, n:1,
-      upd(dt){ this.t+=dt; this.x+=d*50*dt; this.dead=off(this.x,d); },
-      draw(){ const ph=(this.t*1.5)%1, hop=Math.sin(ph*Math.PI)*16, TAU=Math.PI*2, air=Math.sin(ph*Math.PI);
-        // drawn solid on a small layer, then laid down see-through, so body and legs read as one shape
+  function rabbit(){ const d=side(), gy=H-6, s=rnd(.9,1.2), HOP=.55, STEP=44*s;
+    // pose keyframes over one hop. l lift, t tilt (+ nose down), s stretch, h hind-leg extension, ha hind-leg angle, f front reach
+    const KF=[[0,{l:0,t:0,s:1,h:0,ha:2.4,f:0}],[.14,{l:0,t:.16,s:.93,h:.3,ha:2.25,f:0}],[.28,{l:5,t:-.3,s:1.24,h:1,ha:2.4,f:.45}],[.5,{l:15,t:-.04,s:1.36,h:.95,ha:2.85,f:.95}],[.7,{l:7,t:.24,s:1.2,h:.5,ha:2.7,f:1}],[.84,{l:0,t:.18,s:1.04,h:0,ha:2.3,f:.5}],[1,{l:0,t:0,s:1,h:0,ha:2.4,f:0}]];
+    const ease=u=>u*u*(3-2*u);
+    function pose(p){ let k=0; while(k<KF.length-2 && p>KF[k+1][0]) k++; const [p0,a]=KF[k],[p1,b]=KF[k+1], u=ease(Math.min(1,Math.max(0,(p-p0)/(p1-p0)))), o={}; for(const key in a) o[key]=a[key]+(b[key]-a[key])*u; return o; }
+    return {x:d>0?-30:W+30, t:0, n:1, st:"hop", clock:0, wait:0, x0:0,
+      upd(dt){ this.t+=dt; this.clock+=dt;
+        if(this.st==="sit"){ if(this.clock>=this.wait){ this.st="hop"; this.clock=0; this.x0=this.x; } }
+        else { const p=Math.min(1,this.clock/HOP), m=ease(Math.min(1,Math.max(0,(p-.2)/.64))); this.x=this.x0+d*STEP*m;
+          if(p>=1){ this.st="sit"; this.clock=0; this.wait=Math.random()<.25?rnd(.12,.3):rnd(.6,1.9); } }
+        if(this.x0===0 && this.st==="hop" && this.clock<dt*1.5) this.x0=this.x;
+        this.dead=off(this.x,d); },
+      draw(){ const P=this.st==="hop"?pose(Math.min(1,this.clock/HOP)):KF[0][1];
         const R=rabbit.layer||(rabbit.layer=document.createElement("canvas")), k=dpr*s;
-        R.width=Math.ceil(70*k); R.height=Math.ceil(60*k);
-        const o=R.getContext("2d"); o.setTransform(k,0,0,k,0,0); o.translate(35,44); o.scale(d,1); o.rotate(-Math.cos(ph*Math.PI)*.18);
+        R.width=Math.ceil(80*k); R.height=Math.ceil(64*k);
+        const o=R.getContext("2d"); o.setTransform(k,0,0,k,0,0); o.translate(40,50); o.scale(d,1);
         o.fillStyle=C.soil; o.strokeStyle=C.soil; o.lineCap="round"; o.lineJoin="round";
-        // legs: hind legs push off behind and tuck under in the air; front legs reach forward for the landing
-        const hx=-10-6*Math.cos(TAU*ph), hy=1.5-2.5*air, fx=7+6*Math.cos(TAU*(ph-.75)), fy=1-1.5*air;
-        o.lineWidth=4.4; o.beginPath(); o.moveTo(-6,-5); o.lineTo(hx+2,hy-2); o.stroke();
-        o.lineWidth=2.6; o.beginPath(); o.moveTo(hx+2,hy-2); o.lineTo(hx,hy); o.lineTo(hx-6,hy+.5); o.stroke();
-        o.lineWidth=2.4; o.beginPath(); o.moveTo(6,-4); o.lineTo(fx,fy); o.lineTo(fx+2.2,fy); o.stroke();
-        [[0,-8,11,7,0],[9,-24,2.2,7,-.25],[12.5,-23,2,6.5,.15]].forEach(([x,y,rx,ry,r])=>{ o.beginPath(); o.ellipse(x,y,rx,ry,r,0,7); o.fill(); });
-        [[10,-14,5],[-11,-10,2.8]].forEach(([x,y,r])=>{ o.beginPath(); o.arc(x,y,r,0,7); o.fill(); });
-        ctx.save(); ctx.globalAlpha=.42; ctx.drawImage(R, this.x-35*s, gy-hop-44*s, 70*s, 60*s); ctx.restore(); } }; }
+        o.translate(0,-P.l); o.rotate(P.t);
+        const hx=-6-(P.s-1)*10, fx=10+(P.s-1)*12;
+        // hind legs: hidden while sitting, they push off and trail behind in the air
+        if(P.h>.04){ const L=3+16*P.h, hipx=hx+2, hipy=-6, kx=hipx+Math.cos(P.ha)*L*.55, ky=hipy+Math.sin(P.ha)*L*.55, a2=P.ha+.3, ex=kx+Math.cos(a2)*L*.45, ey=ky+Math.sin(a2)*L*.45;
+          o.lineWidth=4.6; o.beginPath(); o.moveTo(hipx,hipy); o.lineTo(kx,ky); o.stroke();
+          o.lineWidth=2.8; o.beginPath(); o.moveTo(kx,ky); o.lineTo(ex,ey); o.stroke(); }
+        // front legs: tucked paws when sitting, reaching forward in the air and for the landing
+        o.lineWidth=2.6+.6*(1-P.f); o.beginPath(); o.moveTo(fx-4,-7); o.lineTo(fx-3+7*P.f,-1.2+1.5*P.f); o.stroke();
+        // body: haunch, back and chest, head
+        o.beginPath(); o.arc(hx,-9,9,0,7); o.fill();
+        o.beginPath(); o.ellipse((hx+fx)/2,-10,(fx-hx)/2+2,6.6,-.18,0,7); o.fill();
+        o.beginPath(); o.arc(fx,-17,5.2,0,7); o.fill();
+        o.beginPath(); o.arc(hx-9,-11,2.8,0,7); o.fill();
+        // ears lie back in the air, twitch now and then while sitting
+        const back=P.l/15*.9, tw=this.st==="sit"?Math.max(0,Math.sin(this.t*2.3))**12*.35:0;
+        [[-1,-.25],[2,.12]].forEach(([dx,a0],n)=>{ const a=a0-back-(n?tw:0), bx=fx+dx, by=-21; o.beginPath(); o.ellipse(bx+Math.sin(a)*6.5,by-Math.cos(a)*6.5,2.1,7,a,0,7); o.fill(); });
+        ctx.save(); ctx.globalAlpha=.42; ctx.drawImage(R, this.x-40*s, gy-50*s, 80*s, 64*s); ctx.restore(); } }; }
 
   const KINDS=[[bird,16],[flock,6],[butterfly,15],[fish,10],[school,6],[whale,3],[leaf,18],[seedling,11],[ants,5],[rabbit,5]];
   const TOTAL=KINDS.reduce((a,k)=>a+k[1],0);
@@ -2036,12 +2260,14 @@ function startUpwell(){
   matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{ cols(); draw(); });
 }
 
+addEventListener("hashchange",()=>{ const h=(location.hash||"").slice(1); if(h==="results"||h.startsWith("results-")){ const rt=h.slice(8); resultsTag=/^[a-z0-9-]{1,40}$/.test(rt)?rt:null; view={name:"results",tribe:null,tab:"celebrate"}; render(); window.scrollTo({top:0}); } });
 // ---------- boot ----------
 (function(){
   const h=(location.hash||"").slice(1);
   if(h.startsWith("model-") && MODELS[h.slice(6)]) view={name:"model",tribe:h.slice(6),tab:"celebrate"};
   else if(h && byId(h)) view={name:"tribe",tribe:h,tab:"celebrate"};
   else if(["tribes","mine","start","science","orgs","makers","names"].includes(h)) view={name:h,tribe:null,tab:"celebrate"};
+  else if(h==="results" || h.startsWith("results-")){ const rt=h.slice(8); if(/^[a-z0-9-]{1,40}$/.test(rt)) resultsTag=rt; view={name:"results",tribe:null,tab:"celebrate"}; }
   render();
 })();
 </script>
@@ -3743,7 +3969,137 @@ window.BITL_FR={
 "Founding gathering": "Rencontre de fondation",
 "The first meeting of the constellation.": "La première rencontre de la constellation.",
 "Soon": "Bientôt",
-"Gather what we know": "Rassembler ce que nous savons"
+"Gather what we know": "Rassembler ce que nous savons",
+"See what people have chosen so far": "Voir ce que les gens ont choisi jusqu’ici",
+"Prototype. Events, campaigns and field notes shown here are examples. The constellations you join, the ways of caring you choose and any proposal you send are recorded anonymously. Everything else stays in this browser.": "Prototype. Les événements, campagnes et notes de terrain présentés ici sont des exemples. Les constellations auxquelles vous vous joignez, les façons de prendre soin que vous choisissez et vos propositions sont enregistrées de façon anonyme. Tout le reste demeure dans ce navigateur.",
+"Your star is counted.": "Votre étoile est comptée.",
+"Nobody knows who has joined, only how many.": "Personne ne sait qui s’est joint, seulement combien.",
+"See the totals": "Voir les totaux",
+"✦ Your star is here": "✦ Votre étoile est ici",
+"Your constellations and ways of caring are counted anonymously. Your location, email and notification choices stay in this browser. Notifications aren't active yet.": "Vos constellations et vos façons de prendre soin sont comptées de façon anonyme. Votre emplacement, votre courriel et vos choix de notifications demeurent dans ce navigateur. Les notifications ne sont pas encore actives.",
+"Delete my settings for this constellation": "Supprimer mes paramètres pour cette constellation",
+"What we record: anonymous totals of joins and ways of caring, and any proposal you send, with no names or contact details. They're kept in a Google Sheet that only the BITL team can open. We publish totals only.": "Ce que nous enregistrons : des totaux anonymes des adhésions et des façons de prendre soin, ainsi que vos propositions, sans nom ni coordonnées. Ces données sont conservées dans une feuille Google que seule l’équipe de BITL peut ouvrir. Nous ne publions que des totaux.",
+"Propose a constellation": "Proposer une constellation",
+"A constellation can be a species, a kind of ecosystem, or one specific place, like a pond, a mountain, or the park on your street. A new proposal is listed as suggested. It becomes a constellation once work on its model has started and we've found communities already caring about and for it.": "Une constellation peut être une espèce, un type d’écosystème ou un lieu précis : un étang, une montagne, le parc de votre rue. Une nouvelle proposition est d’abord inscrite comme suggérée. Elle devient une constellation lorsque le travail sur son modèle est commencé et que nous avons trouvé des communautés qui y tiennent et en prennent déjà soin.",
+"Propose this constellation": "Proposer cette constellation",
+"Please don't include people's names or contact details. We review proposals before showing them publicly.": "Merci de ne pas inclure de noms de personnes ni de coordonnées. Nous examinons les propositions avant de les afficher publiquement.",
+"+ Propose a new constellation": "+ Proposer une nouvelle constellation",
+"This may already have a home.": "Ceci a peut-être déjà sa place.",
+"<b>This may already have a home.<\/b> Would you like to bring your star here instead?": "<b>Ceci a peut-être déjà sa place.<\/b> Aimeriez-vous plutôt apporter votre étoile ici ?",
+"No, propose it as new": "Non, la proposer comme nouvelle",
+"Your proposals": "Vos propositions",
+"Suggested": "Suggérée",
+"Withdraw": "Retirer",
+"Welcome from the Montréal talk.": "Bienvenue aux participants de la conférence de Montréal.",
+"Bring your star to a constellation, or propose a new one.": "Apportez votre étoile à une constellation, ou proposez-en une nouvelle.",
+"See what the room has chosen": "Voir ce que la salle a choisi",
+"Thank you": "Merci",
+"Your proposal is recorded.": "Votre proposition est enregistrée.",
+"It's listed as suggested for now. It becomes a constellation once work on its model has started and we've found communities already caring about and for it.": "Elle est inscrite comme suggérée pour l’instant. Elle deviendra une constellation lorsque le travail sur son modèle sera commencé et que nous aurons trouvé des communautés qui y tiennent et en prennent déjà soin.",
+"Browse constellations": "Parcourir les constellations",
+"Propose another": "En proposer une autre",
+"Results": "Résultats",
+"Results so far": "Résultats jusqu’ici",
+"What people at the Montréal talk have chosen.": "Ce que les gens de la conférence de Montréal ont choisi.",
+"What people have chosen so far.": "Ce que les gens ont choisi jusqu’ici.",
+"Loading the latest totals…": "Chargement des derniers totaux…",
+"The totals aren't available right now. Please try again in a minute.": "Les totaux ne sont pas disponibles pour le moment. Veuillez réessayer dans une minute.",
+"person has taken part": "personne a participé",
+"people have taken part": "personnes ont participé",
+"star brought": "étoile apportée",
+"stars brought": "étoiles apportées",
+"new constellation proposed": "nouvelle constellation proposée",
+"new constellations proposed": "nouvelles constellations proposées",
+"Stars in each constellation": "Étoiles dans chaque constellation",
+"Ways of caring chosen": "Façons de prendre soin choisies",
+"Proposed constellations": "Constellations proposées",
+"{0} more proposal is being reviewed.": "{0} autre proposition est en cours d’examen.",
+"{0} more proposals are being reviewed.": "{0} autres propositions sont en cours d’examen.",
+"Proposals appear here after a quick review.": "Les propositions s’affichent ici après un bref examen.",
+"None yet. Proposals appear here after a quick review.": "Aucune pour l’instant. Les propositions s’affichent ici après un bref examen.",
+"Totals only. No one can see who chose what. This page updates about once a minute.": "Totaux seulement. Personne ne peut voir qui a choisi quoi. Cette page se met à jour environ une fois par minute.",
+"Bring your star to Cetus": "Apportez votre étoile à Cetus",
+"Bring your star to Corallium": "Apportez votre étoile à Corallium",
+"Bring your star to Silva": "Apportez votre étoile à Silva",
+"Bring your star to Canora": "Apportez votre étoile à Canora",
+"Bring your star to Anthophila": "Apportez votre étoile à Anthophila",
+"Bring your star to Ailuropoda": "Apportez votre étoile à Ailuropoda",
+"Bring your star to Aranea": "Apportez votre étoile à Aranea",
+"Bring your star to the Chesapeake Constellation": "Apportez votre étoile à la constellation Chesapeake",
+"Bring your star to the Champlain Constellation": "Apportez votre étoile à la constellation Champlain",
+"Bring your star to the Agamenticus Constellation": "Apportez votre étoile à la constellation Agamenticus",
+"Bring your star to the Cape Neddick Constellation": "Apportez votre étoile à la constellation Cape Neddick",
+"Your ways: Discover": "Vos façons : Découvrir",
+"Your ways: Celebrate": "Vos façons : Célébrer",
+"Your ways: Nurture": "Vos façons : Prendre soin",
+"Your ways: Nurture together": "Vos façons : Prendre soin ensemble",
+"Your ways: Discover · Celebrate": "Vos façons : Découvrir · Célébrer",
+"Your ways: Discover · Nurture": "Vos façons : Découvrir · Prendre soin",
+"Your ways: Discover · Nurture together": "Vos façons : Découvrir · Prendre soin ensemble",
+"Your ways: Celebrate · Nurture": "Vos façons : Célébrer · Prendre soin",
+"Your ways: Celebrate · Nurture together": "Vos façons : Célébrer · Prendre soin ensemble",
+"Your ways: Nurture · Nurture together": "Vos façons : Prendre soin · Prendre soin ensemble",
+"Your ways: Discover · Celebrate · Nurture": "Vos façons : Découvrir · Célébrer · Prendre soin",
+"Your ways: Discover · Celebrate · Nurture together": "Vos façons : Découvrir · Célébrer · Prendre soin ensemble",
+"Your ways: Discover · Nurture · Nurture together": "Vos façons : Découvrir · Prendre soin · Prendre soin ensemble",
+"Your ways: Celebrate · Nurture · Nurture together": "Vos façons : Célébrer · Prendre soin · Prendre soin ensemble",
+"Your ways: Discover · Celebrate · Nurture · Nurture together": "Vos façons : Découvrir · Célébrer · Prendre soin · Prendre soin ensemble",
+"✦ Your star is already in Cetus": "✦ Votre étoile est déjà dans Cetus",
+"Learn about Cetus": "En savoir plus sur Cetus",
+"✦ Your star is now in Cetus.": "✦ Votre étoile est maintenant dans Cetus.",
+"✦ Your star is already in Cetus.": "✦ Votre étoile est déjà dans Cetus.",
+"Go to Cetus": "Aller à Cetus",
+"✦ Your star is already in Corallium": "✦ Votre étoile est déjà dans Corallium",
+"Learn about Corallium": "En savoir plus sur Corallium",
+"✦ Your star is now in Corallium.": "✦ Votre étoile est maintenant dans Corallium.",
+"✦ Your star is already in Corallium.": "✦ Votre étoile est déjà dans Corallium.",
+"Go to Corallium": "Aller à Corallium",
+"✦ Your star is already in Silva": "✦ Votre étoile est déjà dans Silva",
+"Learn about Silva": "En savoir plus sur Silva",
+"✦ Your star is now in Silva.": "✦ Votre étoile est maintenant dans Silva.",
+"✦ Your star is already in Silva.": "✦ Votre étoile est déjà dans Silva.",
+"Go to Silva": "Aller à Silva",
+"✦ Your star is already in Canora": "✦ Votre étoile est déjà dans Canora",
+"Learn about Canora": "En savoir plus sur Canora",
+"✦ Your star is now in Canora.": "✦ Votre étoile est maintenant dans Canora.",
+"✦ Your star is already in Canora.": "✦ Votre étoile est déjà dans Canora.",
+"Go to Canora": "Aller à Canora",
+"✦ Your star is already in Anthophila": "✦ Votre étoile est déjà dans Anthophila",
+"Learn about Anthophila": "En savoir plus sur Anthophila",
+"✦ Your star is now in Anthophila.": "✦ Votre étoile est maintenant dans Anthophila.",
+"✦ Your star is already in Anthophila.": "✦ Votre étoile est déjà dans Anthophila.",
+"Go to Anthophila": "Aller à Anthophila",
+"✦ Your star is already in Ailuropoda": "✦ Votre étoile est déjà dans Ailuropoda",
+"Learn about Ailuropoda": "En savoir plus sur Ailuropoda",
+"✦ Your star is now in Ailuropoda.": "✦ Votre étoile est maintenant dans Ailuropoda.",
+"✦ Your star is already in Ailuropoda.": "✦ Votre étoile est déjà dans Ailuropoda.",
+"Go to Ailuropoda": "Aller à Ailuropoda",
+"✦ Your star is already in Aranea": "✦ Votre étoile est déjà dans Aranea",
+"Learn about Aranea": "En savoir plus sur Aranea",
+"✦ Your star is now in Aranea.": "✦ Votre étoile est maintenant dans Aranea.",
+"✦ Your star is already in Aranea.": "✦ Votre étoile est déjà dans Aranea.",
+"Go to Aranea": "Aller à Aranea",
+"✦ Your star is already in the Chesapeake Constellation": "✦ Votre étoile est déjà dans la constellation Chesapeake",
+"Learn about the Chesapeake Constellation": "En savoir plus sur la constellation Chesapeake",
+"✦ Your star is now in the Chesapeake Constellation.": "✦ Votre étoile est maintenant dans la constellation Chesapeake.",
+"✦ Your star is already in the Chesapeake Constellation.": "✦ Votre étoile est déjà dans la constellation Chesapeake.",
+"Go to the Chesapeake Constellation": "Aller à la constellation Chesapeake",
+"✦ Your star is already in the Champlain Constellation": "✦ Votre étoile est déjà dans la constellation Champlain",
+"Learn about the Champlain Constellation": "En savoir plus sur la constellation Champlain",
+"✦ Your star is now in the Champlain Constellation.": "✦ Votre étoile est maintenant dans la constellation Champlain.",
+"✦ Your star is already in the Champlain Constellation.": "✦ Votre étoile est déjà dans la constellation Champlain.",
+"Go to the Champlain Constellation": "Aller à la constellation Champlain",
+"✦ Your star is already in the Agamenticus Constellation": "✦ Votre étoile est déjà dans la constellation Agamenticus",
+"Learn about the Agamenticus Constellation": "En savoir plus sur la constellation Agamenticus",
+"✦ Your star is now in the Agamenticus Constellation.": "✦ Votre étoile est maintenant dans la constellation Agamenticus.",
+"✦ Your star is already in the Agamenticus Constellation.": "✦ Votre étoile est déjà dans la constellation Agamenticus.",
+"Go to the Agamenticus Constellation": "Aller à la constellation Agamenticus",
+"✦ Your star is already in the Cape Neddick Constellation": "✦ Votre étoile est déjà dans la constellation Cape Neddick",
+"Learn about the Cape Neddick Constellation": "En savoir plus sur la constellation Cape Neddick",
+"✦ Your star is now in the Cape Neddick Constellation.": "✦ Votre étoile est maintenant dans la constellation Cape Neddick.",
+"✦ Your star is already in the Cape Neddick Constellation.": "✦ Votre étoile est déjà dans la constellation Cape Neddick.",
+"Go to the Cape Neddick Constellation": "Aller à la constellation Cape Neddick",
+"← Back to your proposal": "← Retour à votre proposition"
 };
 window.BITL_FR_CAPS=[[1.0, 6.2, "Qu’est-ce qui compte pour vous, sur cette terre ?"], [6.4, 11.0, "Un lieu ? Un animal, une plante, un écosystème ?"], [11.1, 14.4, "Qu’espérez-vous voir durer, après vous ?"], [14.5, 17.4, "Qu’aimez-vous ?"], [17.8, 23.4, "Imaginez la même question, posée à chaque personne sur Terre. Et les réponses qui affluent."], [24.2, 28.6, "Nous découvrirons que nous faisons partie de constellations, dont certaines apparaissent pour la première fois."], [28.8, 32.8, "Une pour les baleines. Une pour les pandas. Pour le lac Champlain. Pour le parc au bout de votre rue."], [33.2, 36.8, "Nous tenons à ce qui compte pour nous."], [37.0, 40.8, "Nous pouvons aussi en prendre soin."], [41.2, 47.8, "Retroussez vos manches avec quelqu’un qui ne vote pas comme vous, et faites-vous un nouvel ami."], [48.9, 53.0, "Des gens · qui tiennent à · et prennent soin de · la Vie."], [53.0, 56.0, "Des gens · qui aiment · la Vie."], [56.0, 61.0, "BringItToLife.org"]];
 </script>
