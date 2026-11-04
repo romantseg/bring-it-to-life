@@ -7,7 +7,7 @@
 | Fact | Value |
 |---|---|
 | Source | https://claude.ai/artifact/6Pp9aE5NvNvnsLzRYQuooL (public share link to artifact `2bad1cb3-2ac7-4089-9164-450d54c56167`) |
-| Imported | 2026-10-29, by Roman, from frame version `1793115625-2792`; updated 2026-11-02 to `1793478422-bd1f` (adds French), at Greg's request; replaced 2026-11-04 by the standalone `index.html` Greg emailed for his Montréal talk (anonymous counts, Results page, talk banner) |
+| Imported | 2026-10-29, by Roman, from frame version `1793115625-2792`; updated 2026-11-02 to `1793478422-bd1f` (adds French), at Greg's request; replaced 2026-11-04 by the standalone `index.html` Greg emailed for his Montréal talk (anonymous counts, Results page, talk banner), then that afternoon by his emailed fix for the French diagrams (labels wrap or shrink to fit their boxes) |
 | Author | Greg, who sent the link on 2026-10-29 |
 | Film | `bil-film-v3.mp4` (61 s, 1080p, 11.7 MB) and `bil-film-v3-poster.jpg`, which the home page's `<video>` loads from beside `index.html`. The artifact refers to them but doesn't contain them; Greg emailed them on 2026-10-31 and they went live on 2026-11-02 |
 

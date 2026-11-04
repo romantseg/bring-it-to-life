@@ -270,6 +270,8 @@ a.oname:hover{text-decoration:underline}
 .chain{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .chain span{font-family:var(--f-display);font-weight:600;font-size:.92rem;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.3em .8em}
 .chain b{color:var(--muted)}
+.chain .cs{display:inline-flex;gap:8px;align-items:center;font-style:normal;white-space:nowrap}
+.both + .keyrow{margin-top:16px}
 .opengrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:36px;align-items:start}
 
 @media (max-width:860px){
@@ -1482,11 +1484,11 @@ function modelDiagram(t,M){
   const hyb=pw.filter(p=>p.cls==="h"||p.cls==="m"), lcaP=pw.filter(p=>p.cls==="l");
   // middle column: emissions node centred on the LCA group, indicators spread along the hybrid group
   const emY=(lcaP[0].y+lcaP[lcaP.length-1].y+44)/2;
-  const iTop=hyb[0].y-6, iBot=hyb[hyb.length-1].y+50, iStep=M.inds.length>1?Math.max(56,(iBot-iTop-46)/(M.inds.length-1)):0;
+  const iTop=hyb[0].y-6, iBot=hyb[hyb.length-1].y+66, iStep=M.inds.length>1?Math.max(72,(iBot-iTop-62)/(M.inds.length-1)):0;
   const inds=M.inds.map((i,n)=>Object.assign({y:iTop+n*iStep},i));
   const I=id=>inds.find(i=>i.id===id);
   // consumption + inventory
-  const cTop=emY-10, cBot=inds[inds.length-1].y+46, cStep=(cBot-cTop-40)/(M.cons.length-1);
+  const cTop=emY-10, cBot=inds[inds.length-1].y+62, cStep=(cBot-cTop-40)/(M.cons.length-1);
   const cons=M.cons.map((c,n)=>Object.assign({y:cTop+n*cStep},c));
   const lciTop=cTop-24, lciBot=cBot+24, lciMid=(lciTop+lciBot)/2;
   const H=Math.max(py, lciBot+40)+44;
@@ -1512,7 +1514,7 @@ function modelDiagram(t,M){
   cons.forEach(c=>{ links+=`<path class="lk ${G.cls(new Set([c.id,...G.desc(c.id)]))}" d="${curve(216,c.y+20,250,c.y+20)}" stroke="var(--muted)" stroke-width="2" fill="none" opacity=".7"/>`; });
   // inventory → emissions, inventory → indicators
   links+=`<path class="lk ${G.cls(G.rel("em"))}" d="${curve(400,emY,440,emY)}" stroke="var(--discover)" stroke-width="3" fill="none"/>`;
-  inds.forEach(i=>{ links+=`<path class="lk ${G.cls(G.rel(i.id))}" d="${curve(400,i.y+23,440,i.y+23)}" stroke="var(--hybrid)" stroke-width="3" fill="none"/>`; });
+  inds.forEach(i=>{ links+=`<path class="lk ${G.cls(G.rel(i.id))}" d="${curve(400,i.y+31,440,i.y+31)}" stroke="var(--hybrid)" stroke-width="3" fill="none"/>`; });
   // emissions → LCA categories, and (dashed) → contaminants
   (G.out.em||[]).forEach(id=>{ const p=P(id), s=new Set(["em",id,...G.anc("em")]);
     if(p.cls==="l") links+= p.s? `<path class="lk ${G.cls(s)}" d="${curve(670,emY,X,p.y+22)}" stroke="var(--discover)" stroke-width="3" fill="none"/>`
@@ -1520,40 +1522,106 @@ function modelDiagram(t,M){
     else links+=`<path class="lk ${G.cls(s)}" d="${curve(670,emY,X,p.y+22)}" stroke="var(--discover)" stroke-width="2" fill="none" stroke-dasharray="6 5" opacity=".75"/>`; });
   // indicators → hybrid pathways
   inds.forEach(i=>i.to.forEach(id=>{ const p=P(id), s=new Set([i.id,id,...G.anc(i.id)]);
-    links+=`<path class="lk ${G.cls(s)}" d="${curve(670,i.y+23,X,p.y+22)}" stroke="var(--hybrid)" stroke-width="2" fill="none" opacity=".6"/>`; }));
+    links+=`<path class="lk ${G.cls(s)}" d="${curve(670,i.y+31,X,p.y+22)}" stroke="var(--hybrid)" stroke-width="2" fill="none" opacity=".6"/>`; }));
   let flows="";
   human.forEach(p=>{ flows+=`<path class="lk ${G.cls(G.rel(p.id))}" d="${curve(X+280,p.y+22,1090,p.sy)}" stroke="${colOf(p)}" stroke-width="${Math.max(2,p.s*k).toFixed(1)}" fill="none" opacity=".55"/>`; });
   const stackRects=human.map(p=>`<rect class="lk ${G.cls(G.rel(p.id))}" x="1090" y="${(p.sy-p.s*k/2).toFixed(1)}" width="10" height="${(p.s*k).toFixed(1)}" fill="${colOf(p)}"/>`).join("")+
     `<rect x="1090" y="${(natY-M.natural*k/2).toFixed(1)}" width="10" height="${(M.natural*k).toFixed(1)}" fill="var(--natural)"/>`;
   const consNode=c=>`<g class="lk ${G.cls(G.rel(c.id))}" data-pw="${c.id}"><rect x="20" y="${c.y.toFixed(1)}" width="196" height="40" rx="20" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.4"/>
       <text class="ma" x="36" y="${(c.y+25).toFixed(1)}">${esc(c.n)}</text></g>`;
-  const indNode=i=>`<g class="lk ${G.cls(G.rel(i.id))}" data-pw="${i.id}"><rect x="440" y="${i.y.toFixed(1)}" width="230" height="46" rx="10" fill="var(--surface)" stroke="var(--hybrid)" stroke-width="1.6"/>
-      <text class="ma" x="454" y="${(i.y+19).toFixed(1)}">${esc(i.n)}</text><text class="mu" x="454" y="${(i.y+36).toFixed(1)}">${esc(i.u)}</text></g>`;
+  const indNode=i=>`<g class="lk ${G.cls(G.rel(i.id))}" data-pw="${i.id}"><rect x="440" y="${i.y.toFixed(1)}" width="230" height="62" rx="10" fill="var(--surface)" stroke="var(--hybrid)" stroke-width="1.6"/>
+      <text class="ma" x="454" y="${(i.y+25).toFixed(1)}">${esc(i.n)}</text><text class="mu" x="454" y="${(i.y+44).toFixed(1)}">${esc(i.u)}</text></g>`;
   const ids=new Set([...pw.map(p=>p.id),...cons.map(c=>c.id),...inds.map(i=>i.id),"em"]);
   const css=[...ids].map(id=>`.mdl[data-hl="${id}"] .pw-${id}{opacity:1!important}`).join("");
   const np=pw.filter(p=>p.cls==="n");
   return `<style>${css}</style><svg class="mdl" viewBox="0 0 ${W} ${H}" role="img" aria-label="Model diagram for ${esc(t.name)}: what people consume, the life cycle inventory, emissions and activity indicators, pathways, and each pathway's share of harm">
     <text class="mh" x="20" y="24">WHAT PEOPLE CONSUME</text><text class="mh" x="250" y="24">LIFE CYCLE MODELS</text><text class="mh" x="${X}" y="24">PATHWAY · SHARE OF HARM (DRAFT)</text><text class="mh" x="1190" y="24" text-anchor="middle">${esc(t.name.toUpperCase())}</text>
     ${gh.map(([l,c,y])=>`<text class="mg" x="${X}" y="${y}" fill="${c}">${l}</text>`).join("")}
-    <text class="mg" x="440" y="${(emY-44).toFixed(1)}" fill="var(--discover)">INVENTORY RESULTS</text>
+    <text class="mg" x="440" y="${(emY-50).toFixed(1)}" fill="var(--discover)">INVENTORY RESULTS</text>
     <text class="mg" x="440" y="${(inds[0].y-14).toFixed(1)}" fill="var(--hybrid)">ACTIVITY INDICATORS</text>
     ${links}${flows}
     <g class="lk ${G.cls(ids)}"><rect x="250" y="${lciTop.toFixed(1)}" width="150" height="${(lciBot-lciTop).toFixed(1)}" rx="14" fill="var(--soft)" stroke="var(--line)" stroke-width="1.2"/>
       <text class="mn" x="325" y="${(lciMid-14).toFixed(1)}" text-anchor="middle">Life cycle</text><text class="mn" x="325" y="${(lciMid+4).toFixed(1)}" text-anchor="middle">inventory</text>
       <text class="mu" x="325" y="${(lciMid+26).toFixed(1)}" text-anchor="middle">supply chains</text><text class="mu" x="325" y="${(lciMid+42).toFixed(1)}" text-anchor="middle">behind consumption</text></g>
-    <g class="lk ${G.cls(G.rel("em"))}" data-pw="em"><rect x="440" y="${(emY-30).toFixed(1)}" width="230" height="60" rx="12" fill="var(--surface)" stroke="var(--discover)" stroke-width="1.8"/>
+    <g class="lk ${G.cls(G.rel("em"))}" data-pw="em"><rect x="440" y="${(emY-36).toFixed(1)}" width="230" height="72" rx="12" fill="var(--surface)" stroke="var(--discover)" stroke-width="1.8"/>
       <text class="mn" x="456" y="${(emY-6).toFixed(1)}">Emissions and resources</text><text class="mu" x="456" y="${(emY+14).toFixed(1)}">greenhouse gases, nutrients, chemicals</text></g>
     ${cons.map(consNode).join("")}
     ${inds.map(indNode).join("")}
     ${pw.map(node).join("")}
-    ${np.length?`<text class="mu" x="${X-14}" y="${(np[0].y+26).toFixed(1)}" text-anchor="end">no link to consumption</text>`:""}
+    ${np.length?`<text class="mu" x="${X-14}" y="${Math.max(np[0].y+26, ...inds.filter(i=>i.y<np[0].y+40).map(i=>i.y+62+16)).toFixed(1)}" text-anchor="end">no link to consumption</text>`:""}
     ${stackRects}
     ${badge(t).replace("<svg ",`<svg x="1110" y="${(cy-92).toFixed(1)}" width="160" height="178" `)}
-    <text class="mu" x="1190" y="${(cy+108).toFixed(1)}" text-anchor="middle">${total-M.natural}% from human activity</text>
-    ${M.natural?`<text class="mu" x="1190" y="${(cy+126).toFixed(1)}" text-anchor="middle">+ ${M.natural}% natural causes</text>`:""}
+    <text class="mu mhum" x="1190" y="${(cy+108).toFixed(1)}" text-anchor="middle">${total-M.natural}% from human activity</text>
+    ${M.natural?`<text class="mu mnat" x="1190" y="${(cy+126).toFixed(1)}" text-anchor="middle">+ ${M.natural}% natural causes</text>`:""}
     ${(M.foot||[]).slice(0,2).map((f,i,a)=>`<text class="mu" x="20" y="${H-16-(a.length-1-i)*18}">${esc(f)}</text>`).join("")}
   </svg>`;
 }
+
+// ---------- Fit text inside model-diagram boxes (runs after translation; wraps to 2 lines, then shrinks) ----------
+window.FIT = (()=>{
+  const NS="http://www.w3.org/2000/svg";
+  const width=(t,s)=>{ t.textContent=s; return t.getComputedTextLength(); };
+  function split(t,s,n){ // best split of s into n (1 or 2) lines: minimise the widest line
+    if(n===1) return [[s],width(t,s)];
+    const w=s.split(" "); if(w.length<2) return [[s],width(t,s)];
+    if(n===3){ if(w.length<3) return split(t,s,2); let best=null;
+      for(let i=1;i<w.length-1;i++) for(let j=i+1;j<w.length;j++){ const ls=[w.slice(0,i).join(" "),w.slice(i,j).join(" "),w.slice(j).join(" ")]; const m=Math.max(...ls.map(l=>width(t,l))); if(!best||m<best[1]) best=[ls,m]; }
+      return best; }
+    let best=null;
+    for(let i=1;i<w.length;i++){ const a=w.slice(0,i).join(" "), b=w.slice(i).join(" "); const m=Math.max(width(t,a),width(t,b)); if(!best||m<best[1]) best=[[a,b],m]; }
+    return best;
+  }
+  function setLines(t,lines,x,ys,scale){
+    t.textContent=""; t.style.fontSize=scale<1?`${(parseFloat(getComputedStyle(t).fontSize)||13)*scale}px`:"";
+    lines.forEach((l,i)=>{ const sp=document.createElementNS(NS,"tspan"); sp.setAttribute("x",x); sp.setAttribute("y",ys[i].toFixed(1)); sp.textContent=l; t.appendChild(sp); });
+  }
+  function box(g){
+    const r=g.querySelector(":scope > rect"); if(!r) return;
+    const texts=[...g.querySelectorAll(":scope > text")]; if(!texts.length||texts.length>2) return;
+    if(texts.some(t=>t.getAttribute("text-anchor"))) { // pathway node: one title line, percent on the right — shrink only
+      const tt=texts.find(t=>!t.getAttribute("text-anchor")), pp=texts.find(t=>t.classList.contains("mp")); if(!tt) return;
+      const rx=+r.getAttribute("x"), rw=+r.getAttribute("width"), x=+tt.getAttribute("x");
+      const avail=rx+rw-x-(pp?pp.getComputedTextLength()+22:14), w=tt.getComputedTextLength();
+      if(w>avail){ const fs=parseFloat(getComputedStyle(tt).fontSize); tt.style.fontSize=`${fs*Math.max(.7,avail/w)}px`; }
+      return; }
+    const rx=+r.getAttribute("x"), ry=+r.getAttribute("y"), rw=+r.getAttribute("width"), rh=+r.getAttribute("height");
+    const x=+texts[0].getAttribute("x"), avail=rw-2*(x-rx), budget=rh-8;
+    const src=texts.map(t=>t.querySelector('tspan')?t.dataset.src:(t.dataset.src=t.textContent));
+    const fs=texts.map(t=>{ t.style.fontSize=""; return parseFloat(getComputedStyle(t).fontSize)||13; });
+    const lh=fs.map(f=>f*1.18);
+    const configs=texts.length===2?[[1,1],[1,2],[2,1],[1,3],[2,2]]:[[1],[2]];
+    const opts=configs.map(c=>c.map((n,i)=>split(texts[i],src[i],n)));
+    let pick=null;
+    for(let s=1; s>=.7 && !pick; s-=.04)
+      for(let k=0;k<configs.length && !pick;k++){
+        const o=opts[k], h=o.reduce((a,[ls],i)=>a+ls.length*lh[i]*s,0);
+        if(h<=budget && o.every(([ls,m])=>m*s<=avail)) pick=[o,s];
+      }
+    if(!pick){ const o=opts[opts.length-1]; const m=Math.max(...o.map(([ls,mm])=>mm)); pick=[o,Math.max(.62,Math.min(avail/m, budget/o.reduce((a,[ls],i)=>a+ls.length*lh[i],0)))]; }
+    const [o,s]=pick, H=o.reduce((a,[ls],i)=>a+ls.length*lh[i]*s,0); let y=ry+(rh-H)/2;
+    o.forEach(([ls],i)=>{ const ys=ls.map((_,j)=>y+(j+.78)*lh[i]*s); setLines(texts[i],ls,x,ys,s); y+=ls.length*lh[i]*s; });
+  }
+  function edges(svg){
+    const W=svg.viewBox.baseVal.width;
+    svg.querySelectorAll("text.mh").forEach(t=>{ const b=t.getBBox(); if(b.x+b.width>W-4){ t.setAttribute("text-anchor","end"); t.setAttribute("x",W-6); } });
+    const hum=svg.querySelector("text.mhum"), nat=svg.querySelector("text.mnat");
+    if(hum){ const src=hum.querySelector('tspan')?hum.dataset.src:(hum.dataset.src=hum.textContent), b=hum.getBBox(), cx=+hum.getAttribute("x");
+      if(b.x+b.width>W-4 || b.x<4){ const [ls]=split(hum,src,2), y=+hum.getAttribute("y");
+        setLines(hum,ls,cx,[y,y+16],1); if(nat) nat.setAttribute("y",(+nat.dataset.y0||+nat.getAttribute("y"))+16); }
+      else if(nat && nat.dataset.y0) nat.setAttribute("y",nat.dataset.y0); }
+    if(nat && !nat.dataset.y0) nat.dataset.y0=nat.getAttribute("y");
+  }
+  function maxw(t){ t.style.fontSize=""; const m=+t.dataset.maxw, w=t.getComputedTextLength(); if(w>m){ const fs=parseFloat(getComputedStyle(t).fontSize); t.style.fontSize=`${fs*Math.max(.68,m/w)}px`; } }
+  function fit(svg){ try{ svg.querySelectorAll("g.lk, g.fb").forEach(box); svg.querySelectorAll("text[data-maxw]").forEach(maxw); edges(svg); svg.dataset.fit=document.documentElement.lang||"en"; }catch(e){} }
+  // put every fitted text back to one plain line (before the page is re-translated)
+  function unfit(){ document.querySelectorAll("svg text[data-maxw]").forEach(t=>t.style.fontSize=""); document.querySelectorAll("svg.mdl text[data-src], svg.fitsvg text[data-src]").forEach(t=>{ t.textContent=t.dataset.src; t.style.fontSize=""; delete t.dataset.src; });
+    document.querySelectorAll("svg.mdl, svg.fitsvg").forEach(s=>delete s.dataset.fit); }
+  function all(){ document.querySelectorAll("svg.mdl, svg.fitsvg").forEach(s=>{ if(s.dataset.fit!==(document.documentElement.lang||"en")) fit(s); }); }
+  let pend=false; const soon=()=>{ if(pend||!window.__bitlI18nReady) return; pend=true; setTimeout(()=>{ pend=false; all(); },30); };
+  new MutationObserver(soon).observe(document.documentElement,{childList:true,subtree:true});
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ if(window.__bitlI18nReady){ unfit(); all(); } });
+  return {all, unfit};
+})();
 
 function classTally(M){
   const all=M.lca.concat(M.direct), sum=c=>all.filter(p=>c.includes(p.cls)).reduce((a,p)=>a+p.s,0);
@@ -1608,42 +1676,43 @@ function modelView(t){
 // ---------- The science ----------
 function pathwayDiagram(){
   const w=byId("whales");
-  const box=(x,y,wd,h,col,title,lines)=>`<rect x="${x}" y="${y}" width="${wd}" height="${h}" rx="12" fill="var(--surface)" stroke="${col}" stroke-width="1.8"/>
-    <text class="dt" x="${x+16}" y="${y+28}">${title}</text>${lines.map((l,i)=>`<text class="ds" x="${x+16}" y="${y+50+i*19}">${l}</text>`).join("")}`;
+  // each box: one title and one subtitle; the fitter wraps/shrinks them to fit (any language)
+  const box=(x,y,wd,h,col,title,sub)=>`<g class="fb"><rect x="${x}" y="${y}" width="${wd}" height="${h}" rx="12" fill="var(--surface)" stroke="${col}" stroke-width="1.8"/>
+    <text class="dt" x="${x+16}" y="${y+28}">${title}</text><text class="ds" x="${x+16}" y="${y+52}">${sub}</text></g>`;
   const arrow=(d,col,m)=>`<path d="${d}" fill="none" stroke="${col}" stroke-width="3" marker-end="url(#${m})"/>`;
   const mk=(id,col)=>`<marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${col}"/></marker>`;
   const B="var(--discover)", V="var(--hybrid)", G="var(--nurture)", H="var(--celebrate)", M="var(--muted)";
-  return `<svg viewBox="0 0 980 580" role="img" aria-label="Human activities harm what we love through three kinds of pathways: conventional LCIA pathways, hybrid pathways whose activity levels come from life cycle models, and other direct pathways. Handprints help it.">
+  return `<svg class="fitsvg" viewBox="0 0 1060 600" role="img" aria-label="Human activities harm what we love through three kinds of pathways: conventional LCIA pathways, hybrid pathways whose activity levels come from life cycle models, and other direct pathways. Handprints help it.">
     <defs>${mk("aB",B)}${mk("aV",V)}${mk("aG",G)}${mk("aH",H)}${mk("aM",M)}</defs>
-    <rect x="12" y="120" width="164" height="230" rx="14" fill="var(--soft)"/>
-    <text class="dt" x="28" y="152">What we all do</text>
-    ${["Eat","Travel","Heat and power homes","Buy and build","Fish and farm"].map((s,i)=>`<text class="ds" x="28" y="${184+i*28}" style="font-style:normal">${s}</text>`).join("")}
-    <rect x="196" y="40" width="96" height="234" rx="12" fill="var(--soft)" stroke="var(--line)" stroke-width="1.2"/>
-    <text class="dt" x="244" y="146" text-anchor="middle">Life cycle</text><text class="dt" x="244" y="167" text-anchor="middle">inventory</text>
-    <text class="lane" x="326" y="28" fill="${B}">CONVENTIONAL LCIA PATHWAYS · IN EVERY CONSTELLATION, WEIGHTED FOR EACH</text>
-    ${box(326,40,232,96,B,"Emissions and resources",["greenhouse gases, nutrients,","chemicals, land and water use"])}
-    ${box(590,40,200,96,B,"Life cycle impacts",["climate change, acidification,","nutrient pollution, toxicity"])}
-    <text class="lane" x="326" y="166" fill="${V}">HYBRID PATHWAYS · DIRECT HARM, ACTIVITY FROM LIFE CYCLE MODELS</text>
-    ${box(326,178,232,96,V,"Activity levels",["fish catch, ocean freight,","cruise days, land conversion"])}
-    ${box(590,178,200,96,V,"Direct pressures",["fishing gear, ship strikes,","noise, habitat loss"])}
-    <text class="lane" x="326" y="314" fill="${G}">OTHER DIRECT PATHWAYS · NOT TIED TO CONSUMPTION</text>
-    ${box(326,326,464,78,G,"Other direct pressures",["poaching, invasive species, wildlife disease"])}
-    <text class="lane" x="326" y="444" fill="${H}">HANDPRINTS · ACTIONS THAT HELP</text>
-    ${box(326,456,464,96,H,"Helping and restoring",["restoring habitat, rescuing animals, protecting places,","helping others shrink their footprints"])}
-    ${arrow("M176,157 L190,157",M,"aM")}
-    ${arrow("M292,88 L320,88",B,"aB")}
-    ${arrow("M292,226 L320,226",V,"aV")}
-    ${arrow("M558,88 L584,88",B,"aB")}
-    ${arrow("M558,226 L584,226",V,"aV")}
-    ${arrow("M790,88 C824,88 836,128 846,152",B,"aB")}
-    ${arrow("M790,226 L816,226",V,"aV")}
-    ${arrow("M790,365 C830,365 846,352 852,334",G,"aG")}
-    ${arrow("M176,320 C194,320 184,504 204,504 L320,504",H,"aH")}
-    ${arrow("M790,504 C870,504 922,470 926,352",H,"aH")}
-    ${w.paths?badge(w).replace("<svg ",'<svg x="815" y="140" width="150" height="167" '):""}
-    <text class="dt" x="890" y="330" text-anchor="middle">What we love</text>
-    <text class="ds" x="960" y="112" text-anchor="end" style="font-style:normal" fill="var(--muted)">footprints: harm</text>
-    <text class="ds" x="960" y="548" text-anchor="end" style="font-style:normal">handprints: help</text>
+    <rect x="12" y="120" width="190" height="230" rx="14" fill="var(--soft)"/>
+    <text class="dt" x="28" y="152" data-maxw="160">What we all do</text>
+    ${["Eat","Travel","Heat and power homes","Buy and build","Fish and farm"].map((s,i)=>`<text class="ds" x="28" y="${184+i*28}" style="font-style:normal" data-maxw="160">${s}</text>`).join("")}
+    <rect x="216" y="40" width="118" height="234" rx="12" fill="var(--soft)" stroke="var(--line)" stroke-width="1.2"/>
+    <text class="dt" x="275" y="146" text-anchor="middle" data-maxw="106">Life cycle</text><text class="dt" x="275" y="167" text-anchor="middle" data-maxw="106">inventory</text>
+    <text class="lane" x="352" y="28" fill="${B}" data-maxw="690">CONVENTIONAL LCIA PATHWAYS · IN EVERY CONSTELLATION, WEIGHTED FOR EACH</text>
+    ${box(352,40,250,96,B,"Emissions and resources","greenhouse gases, nutrients, chemicals, land and water use")}
+    ${box(630,40,220,96,B,"Life cycle impacts","climate change, acidification, nutrient pollution, toxicity")}
+    <text class="lane" x="352" y="166" fill="${V}" data-maxw="498">HYBRID PATHWAYS · DIRECT HARM, ACTIVITY FROM LIFE CYCLE MODELS</text>
+    ${box(352,178,250,96,V,"Activity levels","fish catch, ocean freight, cruise days, land conversion")}
+    ${box(630,178,220,96,V,"Direct pressures","fishing gear, ship strikes, noise, habitat loss")}
+    <text class="lane" x="352" y="314" fill="${G}" data-maxw="498">OTHER DIRECT PATHWAYS · NOT TIED TO CONSUMPTION</text>
+    ${box(352,326,498,78,G,"Other direct pressures","poaching, invasive species, wildlife disease")}
+    <text class="lane" x="352" y="444" fill="${H}" data-maxw="498">HANDPRINTS · ACTIONS THAT HELP</text>
+    ${box(352,456,498,96,H,"Helping and restoring","restoring habitat, rescuing animals, protecting places, helping others shrink their footprints")}
+    ${arrow("M202,157 L210,157",M,"aM")}
+    ${arrow("M334,88 L346,88",B,"aB")}
+    ${arrow("M334,226 L346,226",V,"aV")}
+    ${arrow("M602,88 L624,88",B,"aB")}
+    ${arrow("M602,226 L624,226",V,"aV")}
+    ${arrow("M850,88 C884,88 896,128 906,152",B,"aB")}
+    ${arrow("M850,226 L874,226",V,"aV")}
+    ${arrow("M850,365 C890,365 906,352 912,334",G,"aG")}
+    ${arrow("M202,320 C220,320 210,504 230,504 L346,504",H,"aH")}
+    ${arrow("M850,504 C930,504 982,470 986,352",H,"aH")}
+    ${w.paths?badge(w).replace("<svg ",'<svg x="875" y="140" width="150" height="167" '):""}
+    <text class="dt" x="950" y="330" text-anchor="middle" data-maxw="176">What we love</text>
+    <text class="ds" x="1050" y="74" text-anchor="end" style="font-style:normal" fill="var(--muted)" data-maxw="190">footprints: harm</text>
+    <text class="ds" x="1050" y="590" text-anchor="end" style="font-style:normal" data-maxw="190">handprints: help</text>
   </svg>`;
 }
 function bothChart(){
@@ -1687,7 +1756,7 @@ function scienceView(){
         <p class="eq">Harm to whales = Σ life cycle + Σ hybrid + Σ other direct pathways = 100%</p></div>
       <div><h3>This year's activity, felt for decades</h3><p>We count the harm that this year's human activity sets in motion over the next 10 and 100 years. Greenhouse gases emitted today keep harming reefs long after. We assess how strong each pathway is, and how much of its coming harm traces to this year.</p></div>
       <div><h3>From what you do to what it does</h3><p>Each direct pathway links everyday activity to harm, one step at a time. That's how a person or an organization can estimate its own share.</p>
-        <div class="chain"><span>Nights at a reef hotel</span><b>→</b><span>Nitrogen in sewage</span><b>→</b><span>Share of harm to reefs</span></div></div>
+        <div class="chain"><span>Nights at a reef hotel</span><em class="cs"><b>→</b><span>Nitrogen in sewage</span></em><em class="cs"><b>→</b><span>Share of harm to reefs</span></em></div></div>
       <div><h3>Uncertainty in plain view</h3><p>Every share carries a low and high estimate, and every source is cited. When experts disagree, the range widens. It doesn't disappear.</p></div>
     </div>
   </div></section>
@@ -2434,21 +2503,26 @@ window.BITL_FR={
 "To support the work of constellations, we develop and promote the advancement of models of what harms each species or place or ecosystem type that people love, and what helps it. This page explains the essence of that work. It's the doorway to the BITL science site, where the models will be open for anyone to examine and improve.": "Pour soutenir le travail des constellations, nous développons des modèles de ce qui nuit à chaque espèce, lieu ou type d’écosystème que les gens aiment, et de ce qui l’aide, et nous en favorisons l’avancement. Cette page explique l’essentiel de ce travail. C’est la porte d’entrée du site scientifique de BITL, où les modèles seront ouverts à tous pour examen et amélioration.",
 "Human activities harm what we love through three kinds of pathways: conventional LCIA pathways, hybrid pathways whose activity levels come from life cycle models, and other direct pathways. Handprints help it.": "Les activités humaines nuisent à ce que nous aimons par trois types de voies : les voies d’ÉICV conventionnelles, les voies hybrides dont les niveaux d’activité proviennent de modèles de cycle de vie, et d’autres voies directes. Les empreintes positives l’aident.",
 "What we all do": "Ce que nous faisons tous",
+"greenhouse gases, nutrients, chemicals, land and water use": "gaz à effet de serre, nutriments, produits chimiques, utilisation des terres et de l’eau",
+"climate change, acidification, nutrient pollution, toxicity": "changements climatiques, acidification, pollution par les nutriments, toxicité",
+"fish catch, ocean freight, cruise days, land conversion": "prises de poisson, fret maritime, jours de croisière, conversion des terres",
+"fishing gear, ship strikes, noise, habitat loss": "engins de pêche, collisions avec les navires, bruit, perte d’habitat",
+"restoring habitat, rescuing animals, protecting places, helping others shrink their footprints": "restauration d’habitats, sauvetage d’animaux, protection de lieux, aide aux autres pour réduire leur empreinte",
 "Eat": "Manger",
 "Travel": "Se déplacer",
-"Heat and power homes": "Chauffer et alimenter les logements en énergie",
+"Heat and power homes": "Chauffer et éclairer",
 "Buy and build": "Acheter et construire",
 "Fish and farm": "Pêcher et cultiver",
 "Life cycle": "Inventaire du",
 "inventory": "cycle de vie",
-"CONVENTIONAL LCIA PATHWAYS · IN EVERY CONSTELLATION, WEIGHTED FOR EACH": "VOIES D’ÉICV CONVENTIONNELLES · DANS CHAQUE CONSTELLATION, PONDÉRÉES POUR CHACUNE",
+"CONVENTIONAL LCIA PATHWAYS · IN EVERY CONSTELLATION, WEIGHTED FOR EACH": "VOIES D’ÉICV CLASSIQUES · DANS CHAQUE CONSTELLATION, PONDÉRÉES POUR CHACUNE",
 "Emissions and resources": "Émissions et ressources",
 "greenhouse gases, nutrients,": "gaz à effet de serre, nutriments,",
 "chemicals, land and water use": "produits chimiques, utilisation des terres et de l’eau",
 "Life cycle impacts": "Impacts du cycle de vie",
 "climate change, acidification,": "changements climatiques, acidification,",
 "nutrient pollution, toxicity": "pollution par les nutriments, toxicité",
-"HYBRID PATHWAYS · DIRECT HARM, ACTIVITY FROM LIFE CYCLE MODELS": "VOIES HYBRIDES · DOMMAGES DIRECTS, ACTIVITÉ ISSUE DES MODÈLES DE CYCLE DE VIE",
+"HYBRID PATHWAYS · DIRECT HARM, ACTIVITY FROM LIFE CYCLE MODELS": "VOIES HYBRIDES · DOMMAGES DIRECTS, ACTIVITÉ SELON LES MODÈLES ACV",
 "Activity levels": "Niveaux d’activité",
 "fish catch, ocean freight,": "prises de poisson, fret maritime,",
 "cruise days, land conversion": "jours de croisière, conversion des terres",
@@ -2512,6 +2586,7 @@ window.BITL_FR={
 "From what you do to what it does": "De ce que vous faites à ce que cela provoque",
 "Each direct pathway links everyday activity to harm, one step at a time. That's how a person or an organization can estimate its own share.": "Chaque voie directe relie une activité quotidienne à des dommages, une étape à la fois. C’est ainsi qu’une personne ou un organisme peut estimer sa propre part.",
 "<span>Nights at a reef hotel<\/span><b>→<\/b><span>Nitrogen in sewage<\/span><b>→<\/b><span>Share of harm to reefs<\/span>": "<span>Nuits dans un hôtel près d’un récif<\/span><b>→<\/b><span>Azote dans les eaux usées<\/span><b>→<\/b><span>Part des dommages aux récifs<\/span>",
+"<span>Nights at a reef hotel<\/span><em class=\"cs\"><b>→<\/b><span>Nitrogen in sewage<\/span><\/em><em class=\"cs\"><b>→<\/b><span>Share of harm to reefs<\/span><\/em>": "<span>Nuits dans un hôtel près d’un récif<\/span><em class=\"cs\"><b>→<\/b><span>Azote dans les eaux usées<\/span><\/em><em class=\"cs\"><b>→<\/b><span>Part des dommages aux récifs<\/span><\/em>",
 "Uncertainty in plain view": "L’incertitude bien en vue",
 "Every share carries a low and high estimate, and every source is cited. When experts disagree, the range widens. It doesn't disappear.": "Chaque part comporte une estimation basse et une estimation haute, et chaque source est citée. Quand les experts ne s’entendent pas, la fourchette s’élargit. Elle ne disparaît pas.",
 "Open to scrutiny": "Ouvert à l’examen",
@@ -3257,7 +3332,7 @@ window.BITL_FR={
 "LIFE CYCLE MODELS": "MODÈLES DE CYCLE DE VIE",
 "PATHWAY · SHARE OF HARM (DRAFT)": "VOIE · PART DES DOMMAGES (ÉBAUCHE)",
 "CONVENTIONAL LCIA · IMPACT WORLD+": "ÉICV CONVENTIONNELLE · IMPACT WORLD+",
-"HYBRID · ACTIVITY FROM LIFE CYCLE MODELS": "HYBRIDE · ACTIVITÉ ISSUE DES MODÈLES DE CYCLE DE VIE",
+"HYBRID · ACTIVITY FROM LIFE CYCLE MODELS": "HYBRIDE · ACTIVITÉ ISSUE DES MODÈLES ACV",
 "DIRECT · NOT TIED TO CONSUMPTION": "DIRECTE · NON LIÉE À LA CONSOMMATION",
 "INVENTORY RESULTS": "RÉSULTATS D’INVENTAIRE",
 "ACTIVITY INDICATORS": "INDICATEURS D’ACTIVITÉ",
@@ -4248,7 +4323,7 @@ window.BITL_FR_CAPS=[[1.0, 6.2, "Qu’est-ce qui compte pour vous, sur cette ter
     if(l===lang) return;
     lang=l; save(l);
     document.documentElement.lang=l;
-    if(l==="fr"){ translateAll(); startObs(); mark(); return; }
+    if(l==="fr"){ if(window.FIT) FIT.unfit(); translateAll(); startObs(); mark(); if(window.FIT) FIT.all(); return; }
     // back to English: restore the static parts and redraw the page
     if(obs){ obs.disconnect(); obs=null; }
     document.querySelectorAll("dialog[open]").forEach(dl=>{ try{dl.close()}catch(e){} });
@@ -4261,6 +4336,7 @@ window.BITL_FR_CAPS=[[1.0, 6.2, "Qu’est-ce qui compte pour vous, sur cette ter
   addSwitch();
   document.documentElement.lang=lang;
   if(lang==="fr"){ translateAll(); startObs(); }
+  window.__bitlI18nReady=true; if(window.FIT) setTimeout(()=>FIT.all(),30);
 
   // used to list every English string the page shows (for translators)
   window.__bitlCollect=function(root){
