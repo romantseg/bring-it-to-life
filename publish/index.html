@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Publish Bring It To Life</title>
+<style>
+:root{--ground:#F1F5EE;--surface:#FFFFFF;--ink:#13292A;--muted:#4D625F;--line:#D3DDD4;--accent:#1F6B4E;--bad:#A2342B;color-scheme:light}
+@media (prefers-color-scheme: dark){:root{--ground:#0D1919;--surface:#142425;--ink:#E5EEE9;--muted:#9CB1AC;--line:#284140;--accent:#6CC497;--bad:#F08A80;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:1.05rem/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif}
+main{max-width:34rem;margin:0 auto;padding:48px 16px}
+h1{font-size:1.7rem;line-height:1.15;margin:0 0 .5rem}
+p{margin:0 0 1rem;color:var(--muted)}
+form{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:16px;margin-top:24px}
+label{display:grid;gap:6px;font-weight:600}
+input{font:inherit;color:inherit;background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+button{font:inherit;font-weight:600;border:0;border-radius:999px;padding:12px 20px;background:var(--accent);color:var(--surface);cursor:pointer;justify-self:start}
+button:disabled{opacity:.6;cursor:wait}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#status{margin:0;color:var(--ink);min-height:1.5em}
+#status.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Publish a new version</h1>
+  <p>Choose the new <code>index.html</code> from Claude. It replaces the page on bringittolife.info and bringittolife.org about a minute after you publish. The film stays as it is.</p>
+  <form id="form">
+    <label>Password
+      <input id="password" type="password" autocomplete="current-password" required>
+    </label>
+    <label>Page file
+      <input id="file" type="file" accept=".html,.htm,text/html" required>
+    </label>
+    <button id="go" type="submit">Publish</button>
+    <p id="status" role="status" aria-live="polite"></p>
+  </form>
+</main>
+<script>
+const form = document.getElementById("form");
+const status = document.getElementById("status");
+const go = document.getElementById("go");
+const say = (text, bad) => { status.textContent = text; status.className = bad ? "bad" : ""; };
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const file = document.getElementById("file").files[0];
+  if (!file) return;
+  go.disabled = true;
+  say("Publishing…");
+  try {
+    const res = await fetch("/api/publish", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: document.getElementById("password").value, html: await file.text() }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) say(data.error || "Something went wrong. Try again in a minute.", true);
+    else if (data.unchanged) say("That file is already live. Nothing to change.");
+    else say("Published. The site shows the new version in about a minute; reload it to check.");
+  } catch {
+    say("Couldn't reach the server. Check your connection and try again.", true);
+  } finally {
+    go.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

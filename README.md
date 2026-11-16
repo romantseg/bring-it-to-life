@@ -5,20 +5,25 @@ Greg Norris's Bring It To Life website, live at https://bringittolife.info and h
 | File | What it is |
 |---|---|
 | `index.html` | The whole site, one file. The only file that changes on a normal update |
+| `publish/index.html`, `api/publish.mjs` | The upload page Greg uses to publish a new `index.html`, and the function behind it |
 | `bil-film-v3.mp4`, `bil-film-v3-poster.jpg` | The home page film (61 s, 1080p) and its poster. The page loads them from beside `index.html`, so keep them on every update |
 
 ## Update the site
 
-**Greg, in the browser:** open https://github.com/romantseg/bring-it-to-life, choose **Add file → Upload files**, drop in the new `index.html` (the name must stay exactly `index.html`), and click **Commit changes**. The site updates in about a minute. Leave the two film files alone.
+**Greg:** open https://bringittolife.org/publish, enter the password Roman gave you, choose the new `index.html` from Claude and click **Publish**. The site updates in about a minute; the film stays as it is.
 
-**Roman:** the same, or replace `index.html` in a clone and push to `main`.
+**Roman:** the same page, or replace `index.html` in a clone and push to `main`.
 
-Before uploading, check the file:
+The upload page (`publish/index.html`) sends the file to `api/publish.mjs`, a Vercel function that checks the password, makes sure the file is a whole page, converts CRLF line endings to LF, adds `lang="en"` to `<html>` if it's missing, and commits the file to `main` through the GitHub API. If the file matches what's live, it changes nothing. It only ever replaces `index.html`. Commits from the page are made as Roman and say "Publish index.html from the upload page".
 
-- It starts with `<html lang="en">`. Greg's emailed files have had a bare `<html>`; add `lang="en"` so screen readers and translation tools know the page is English.
-- Line endings don't matter. A file saved on Windows has CRLF endings; browsers don't care, and `.gitattributes` turns them into LF when you commit from a clone (a browser upload stores the file as it is).
+| Vercel env var (production) | What it is |
+|---|---|
+| `PUBLISH_PASSWORD` | The password Greg types. Roman keeps a copy. To change it, replace it in Vercel and redeploy |
+| `GITHUB_PUBLISH_TOKEN` | A fine-grained GitHub token of Roman's, created 2026-11-16 with no expiry: only this repo, Contents read and write. If it's revoked, make a new one the same way, replace it in Vercel and redeploy |
 
-To undo a mistake, open the commit list on GitHub and revert the commit, or upload the previous `index.html` again. Each deploy also stays in Vercel, where **Promote to Production** on an older one rolls the site back at once.
+`.gitattributes` also keeps line endings LF for commits from a clone.
+
+To undo a mistake, upload the previous `index.html`, or revert the commit on GitHub. Each deploy also stays in Vercel, where **Promote to Production** on an older one rolls the site back at once.
 
 ## Hosting
 
@@ -26,7 +31,7 @@ To undo a mistake, open the commit list on GitHub and revert the commit, or uplo
 |---|---|
 | GitHub | `romantseg/bring-it-to-life`, public. Moved here on 2026-11-16 from `prototypes/bring-it-to-life/` in SaveWave, with its history |
 | Vercel | Team `handprinter`, project `bring-it-to-life`, connected to this repo: production branch `main`, no build step, files served from the repo root. Also at https://bring-it-to-life.vercel.app |
-| Who can deploy | Anyone who can commit to `main`. Vercel blocks commits by non-members of the team only on private repos; this repo is public, so collaborators like Greg need no Vercel seat. Checked 2026-11-16: a commit by an author with no GitHub or Vercel account deployed without approval. Pushes to other branches make preview deploys |
+| Who can deploy | Anyone with the upload page's password, or who can commit to `main`. Vercel blocks commits by non-members of the team only on private repos; this repo is public, so a GitHub collaborator would need no Vercel seat either. Checked 2026-11-16: a commit by an author with no GitHub or Vercel account deployed without approval. Pushes to other branches make preview deploys |
 | Domains | `bringittolife.info` (2026-10-29) and `bringittolife.org` (2026-10-30, Greg's request), both registered at Network Solutions in Greg's account. Each apex serves the site; each `www` redirects to its own apex with a 308. Neither redirects to the other, because Greg may move `.info` to science and modeling later |
 | DNS | The same for both: A `@` → `216.150.1.1` and `216.150.16.1`, CNAME `www` → `a64b06bc47c50eeb.vercel-dns-016.com`, TTL 1 hour |
 | Not connected | `bringittolife.site`, `.online`, `.fun` and `.solutions`, also in Greg's account |
