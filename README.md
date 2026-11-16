@@ -10,7 +10,7 @@ Greg Norris's Bring It To Life website, live at https://bringittolife.info and h
 
 ## Update the site
 
-**Greg:** open https://bringittolife.org/publish, enter the password Roman gave you, choose the new `index.html` from Claude and click **Publish**. The site updates in about a minute; the film stays as it is.
+**Greg:** open https://bringittolife.org/publish, enter the password Roman gave you, paste the page's code from Claude (or choose the downloaded `index.html`) and click **Publish**. The site updates in about a minute; the film stays as it is.
 
 **Roman:** the same page, or replace `index.html` in a clone and push to `main`.
 

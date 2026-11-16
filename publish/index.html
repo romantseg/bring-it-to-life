@@ -15,10 +15,11 @@ h1{font-size:1.7rem;line-height:1.15;margin:0 0 .5rem}
 p{margin:0 0 1rem;color:var(--muted)}
 form{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:16px;margin-top:24px}
 label{display:grid;gap:6px;font-weight:600}
-input{font:inherit;color:inherit;background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+input,textarea{font:inherit;color:inherit;background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
 button{font:inherit;font-weight:600;border:0;border-radius:999px;padding:12px 20px;background:var(--accent);color:var(--surface);cursor:pointer;justify-self:start}
 button:disabled{opacity:.6;cursor:wait}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+textarea{font:.8rem/1.4 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
 #status{margin:0;color:var(--ink);min-height:1.5em}
 #status.bad{color:var(--bad)}
 </style>
@@ -26,13 +27,16 @@ button:disabled{opacity:.6;cursor:wait}
 <body>
 <main>
   <h1>Publish a new version</h1>
-  <p>Choose the new <code>index.html</code> from Claude. It replaces the page on bringittolife.info and bringittolife.org about a minute after you publish. The film stays as it is.</p>
+  <p>Paste the page's code from Claude, or choose the <code>index.html</code> file you downloaded. It replaces the page on bringittolife.info and bringittolife.org about a minute after you publish. The film stays as it is.</p>
   <form id="form">
     <label>Password
       <input id="password" type="password" autocomplete="current-password" required>
     </label>
-    <label>Page file
-      <input id="file" type="file" accept=".html,.htm,text/html" required>
+    <label>Paste the code
+      <textarea id="code" rows="6" spellcheck="false" placeholder="&lt;!doctype html&gt; …"></textarea>
+    </label>
+    <label>Or choose the file
+      <input id="file" type="file" accept=".html,.htm,text/html">
     </label>
     <button id="go" type="submit">Publish</button>
     <p id="status" role="status" aria-live="polite"></p>
@@ -47,14 +51,15 @@ const say = (text, bad) => { status.textContent = text; status.className = bad ?
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const file = document.getElementById("file").files[0];
-  if (!file) return;
+  const pasted = document.getElementById("code").value.trim();
+  if (!file && !pasted) return say("Paste the code or choose the file first.", true);
   go.disabled = true;
   say("Publishing…");
   try {
     const res = await fetch("/api/publish", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: document.getElementById("password").value, html: await file.text() }),
+      body: JSON.stringify({ password: document.getElementById("password").value, html: file ? await file.text() : pasted }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) say(data.error || "Something went wrong. Try again in a minute.", true);
