@@ -27,16 +27,16 @@ textarea{font:.8rem/1.4 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
 <body>
 <main>
   <h1>Publish a new version</h1>
-  <p>Paste the page's code from Claude, or choose the <code>index.html</code> file you downloaded. It replaces the page on bringittolife.info and bringittolife.org about a minute after you publish. The film stays as it is.</p>
+  <p>Choose the page file you exported from Claude (any name ending in <code>.html</code>), or paste its code. It replaces the page on bringittolife.info and bringittolife.org about a minute after you publish. The film stays as it is.</p>
   <form id="form">
     <label>Password
       <input id="password" type="password" autocomplete="current-password" required>
     </label>
-    <label>Paste the code
-      <textarea id="code" rows="6" spellcheck="false" placeholder="&lt;!doctype html&gt; …"></textarea>
-    </label>
-    <label>Or choose the file
+    <label>Page file
       <input id="file" type="file" accept=".html,.htm,text/html">
+    </label>
+    <label>Or paste the code
+      <textarea id="code" rows="4" spellcheck="false" placeholder="&lt;!doctype html&gt; …"></textarea>
     </label>
     <button id="go" type="submit">Publish</button>
     <p id="status" role="status" aria-live="polite"></p>
@@ -52,7 +52,7 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const file = document.getElementById("file").files[0];
   const pasted = document.getElementById("code").value;
-  if (!file && !pasted.trim()) return say("Paste the code or choose the file first.", true);
+  if (!file && !pasted.trim()) return say("Choose the page file or paste its code first.", true);
   go.disabled = true;
   say("Publishing…");
   try {
