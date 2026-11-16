@@ -51,8 +51,8 @@ const say = (text, bad) => { status.textContent = text; status.className = bad ?
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const file = document.getElementById("file").files[0];
-  const pasted = document.getElementById("code").value.trim();
-  if (!file && !pasted) return say("Paste the code or choose the file first.", true);
+  const pasted = document.getElementById("code").value;
+  if (!file && !pasted.trim()) return say("Paste the code or choose the file first.", true);
   go.disabled = true;
   say("Publishing…");
   try {
@@ -63,7 +63,7 @@ form.addEventListener("submit", async (event) => {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) say(data.error || "Something went wrong. Try again in a minute.", true);
-    else if (data.unchanged) say("That file is already live. Nothing to change.");
+    else if (data.unchanged) say("That version is already live. Nothing to change.");
     else say("Published. The site shows the new version in about a minute; reload it to check.");
   } catch {
     say("Couldn't reach the server. Check your connection and try again.", true);
