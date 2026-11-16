@@ -26,6 +26,7 @@ To undo a mistake, open the commit list on GitHub and revert the commit, or uplo
 |---|---|
 | GitHub | `romantseg/bring-it-to-life`, public. Moved here on 2026-11-16 from `prototypes/bring-it-to-life/` in SaveWave, with its history |
 | Vercel | Team `handprinter`, project `bring-it-to-life`, connected to this repo: production branch `main`, no build step, files served from the repo root. Also at https://bring-it-to-life.vercel.app |
+| Who can deploy | Anyone who can commit to `main`. Vercel blocks commits by non-members of the team only on private repos; this repo is public, so collaborators like Greg need no Vercel seat. Checked 2026-11-16: a commit by an author with no GitHub or Vercel account deployed without approval. Pushes to other branches make preview deploys |
 | Domains | `bringittolife.info` (2026-10-29) and `bringittolife.org` (2026-10-30, Greg's request), both registered at Network Solutions in Greg's account. Each apex serves the site; each `www` redirects to its own apex with a 308. Neither redirects to the other, because Greg may move `.info` to science and modeling later |
 | DNS | The same for both: A `@` → `216.150.1.1` and `216.150.16.1`, CNAME `www` → `a64b06bc47c50eeb.vercel-dns-016.com`, TTL 1 hour |
 | Not connected | `bringittolife.site`, `.online`, `.fun` and `.solutions`, also in Greg's account |
