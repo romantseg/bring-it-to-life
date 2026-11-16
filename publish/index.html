@@ -27,13 +27,13 @@ textarea{font:.8rem/1.4 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
 <body>
 <main>
   <h1>Publish a new version</h1>
-  <p>Choose the page file you exported from Claude (any name ending in <code>.html</code>), or paste its code. It replaces the page on bringittolife.info and bringittolife.org about a minute after you publish. The film stays as it is.</p>
+  <p>Choose the file you exported from Claude: the <code>.zip</code>, or an <code>.html</code> page. You can also paste the page's code. It replaces the page on bringittolife.info and bringittolife.org about a minute after you publish. The film stays as it is.</p>
   <form id="form">
     <label>Password
       <input id="password" type="password" autocomplete="current-password" required>
     </label>
-    <label>Page file
-      <input id="file" type="file" accept=".html,.htm,text/html">
+    <label>Exported file
+      <input id="file" type="file" accept=".zip,.html,.htm,application/zip,text/html">
     </label>
     <label>Or paste the code
       <textarea id="code" rows="4" spellcheck="false" placeholder="&lt;!doctype html&gt; …"></textarea>
@@ -46,27 +46,55 @@ textarea{font:.8rem/1.4 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
 const form = document.getElementById("form");
 const status = document.getElementById("status");
 const go = document.getElementById("go");
+// Claude's Export gives a ZIP of index.html plus the film. Only the page is published,
+// so read index.html (or the first .html) out of the ZIP here, in the browser.
+async function pageFrom(file) {
+  if (!/\.zip$/i.test(file.name) && file.type !== "application/zip") return file.text();
+  const buf = await file.arrayBuffer();
+  const v = new DataView(buf);
+  let end = buf.byteLength - 22;
+  while (end >= 0 && v.getUint32(end, true) !== 0x06054b50) end--;
+  if (end < 0) throw new Error("zip");
+  const names = new TextDecoder();
+  const pages = [];
+  for (let i = 0, p = v.getUint32(end + 16, true); i < v.getUint16(end + 10, true); i++) {
+    const nameLen = v.getUint16(p + 28, true);
+    const name = names.decode(new Uint8Array(buf, p + 46, nameLen));
+    if (/\.html?$/i.test(name) && !name.startsWith("__MACOSX/")) {
+      pages.push({ name, method: v.getUint16(p + 10, true), size: v.getUint32(p + 20, true), at: v.getUint32(p + 42, true) });
+    }
+    p += 46 + nameLen + v.getUint16(p + 30, true) + v.getUint16(p + 32, true);
+  }
+  const page = pages.find((e) => /(^|\/)index\.html?$/i.test(e.name)) || pages[0];
+  if (!page) throw new Error("zip");
+  const start = page.at + 30 + v.getUint16(page.at + 26, true) + v.getUint16(page.at + 28, true);
+  const data = new Blob([new Uint8Array(buf, start, page.size)]);
+  if (page.method === 0) return data.text();
+  if (page.method === 8) return new Response(data.stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
+  throw new Error("zip");
+}
+
 const say = (text, bad) => { status.textContent = text; status.className = bad ? "bad" : ""; };
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const file = document.getElementById("file").files[0];
   const pasted = document.getElementById("code").value;
-  if (!file && !pasted.trim()) return say("Choose the page file or paste its code first.", true);
+  if (!file && !pasted.trim()) return say("Choose the exported file or paste the code first.", true);
   go.disabled = true;
   say("Publishing…");
   try {
     const res = await fetch("/api/publish", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: document.getElementById("password").value, html: file ? await file.text() : pasted }),
+      body: JSON.stringify({ password: document.getElementById("password").value, html: file ? await pageFrom(file) : pasted }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) say(data.error || "Something went wrong. Try again in a minute.", true);
     else if (data.unchanged) say("That version is already live. Nothing to change.");
     else say("Published. The site shows the new version in about a minute; reload it to check.");
-  } catch {
-    say("Couldn't reach the server. Check your connection and try again.", true);
+  } catch (err) {
+    say(err.message === "zip" ? "That ZIP has no web page in it. Export again from Claude and choose ZIP." : "Couldn't reach the server. Check your connection and try again.", true);
   } finally {
     go.disabled = false;
   }

@@ -10,11 +10,11 @@ Greg Norris's Bring It To Life website, live at https://bringittolife.info and h
 
 ## Update the site
 
-**Greg:** open https://bringittolife.org/publish, enter the password Roman gave you, choose the page file exported from Claude (artifact title menu → **Export** → **HTML**; any `.html` name works) or paste its code, and click **Publish**. The site updates in about a minute; the film stays as it is.
+**Greg:** open https://bringittolife.org/publish, enter the password Roman gave you, choose the file exported from Claude (artifact title menu → **Export** → **ZIP**) and click **Publish**. An `.html` file or pasted code works too. The site updates in about a minute; the film stays as it is.
 
 **Roman:** the same page, or replace `index.html` in a clone and push to `main`. Whatever the uploaded file is called, it's saved as `index.html`.
 
-The upload page (`publish/index.html`) sends the file to `api/publish.mjs`, a Vercel function that checks the password, makes sure the file is a whole page, converts CRLF line endings to LF, adds `lang="en"` to `<html>` if it's missing, and commits the file to `main` through the GitHub API. If the file matches what's live, it changes nothing. It only ever replaces `index.html`. Commits from the page are made as Roman and say "Publish index.html from the upload page".
+The upload page (`publish/index.html`) takes `index.html` out of Claude's ZIP in the browser (the ZIP also holds the 12 MB film, too big to upload, and the film never changes), then sends the page to `api/publish.mjs`, a Vercel function that checks the password, makes sure the file is a whole page, converts CRLF line endings to LF, adds `lang="en"` to `<html>` if it's missing, and commits the file to `main` through the GitHub API. If the file matches what's live, it changes nothing. It only ever replaces `index.html`. Commits from the page are made as Roman and say "Publish index.html from the upload page".
 
 | Vercel env var (production) | What it is |
 |---|---|
